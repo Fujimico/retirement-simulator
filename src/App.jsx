@@ -477,7 +477,7 @@ export default function App() {
   const LOP = { ...P, borderColor: "#aa88ff33", background: "linear-gradient(160deg,#0d0820,#0a0618)" };
 
   return (
-    <div className="print-page" style={{ minHeight: "100vh", background: "#060e18", color: "#c8d8e8", fontFamily: "'DM Mono','Fira Code','Courier New',monospace", padding: "20px 16px" }}>
+    <div className="print-page" style={{ minHeight: "100vh", width: "100%", boxSizing: "border-box", background: "#060e18", color: "#c8d8e8", fontFamily: "'DM Mono','Fira Code','Courier New',monospace", padding: "20px 16px" }}>
 
       <div style={{ marginBottom: 18 }}>
         <div style={{ textAlign: "center" }}>
