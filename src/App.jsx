@@ -93,18 +93,18 @@ function simulate({
     // 運用バケツに利回り
     investBucket *= (1 + returnRate / 100);
 
-    // 手元バケツ補充リバランス（下限＝生活費×cashBufferMonths）
+    // 支出: 手元から優先、不足分は運用から補填
+    const fromCash = Math.min(cashBucket, annualExpense);
+    cashBucket -= fromCash;
+    investBucket -= (annualExpense - fromCash);
+
+    // 支出後リバランス（下限＝生活費×cashBufferMonths を下回ったら運用から補充）
     const cashFloor = monthlyExp * cashBufferMonths * 1e4;
     if (cashBucket < cashFloor && investBucket > 0) {
       const topUp = Math.min(cashFloor - cashBucket, investBucket);
       cashBucket += topUp;
       investBucket -= topUp;
     }
-
-    // 支出: 手元から優先、不足分は運用から補填
-    const fromCash = Math.min(cashBucket, annualExpense);
-    cashBucket -= fromCash;
-    investBucket -= (annualExpense - fromCash);
 
     points.push({
       age,
@@ -221,23 +221,66 @@ const PHASE_COLORS = ["#2adf90", "#4a9eff", "#aa88ff", "#ff9966", "#ffcc44"];
 
 const PhaseRow = ({ phase, idx, onUpdate, onDelete, currentAge, defaultTakeRate }) => {
   const c = PHASE_COLORS[idx % PHASE_COLORS.length];
+  const takeRate = phase.takeRate ?? defaultTakeRate;
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "14px 1fr 46px 8px 46px 52px 42px 20px", gap: 4, alignItems: "center", marginBottom: 6 }}>
-      <div style={{ width: 8, height: 8, borderRadius: "50%", background: phase.enabled ? c : "#334455", margin: "0 auto", cursor: "pointer" }}
-        onClick={() => onUpdate({ ...phase, enabled: !phase.enabled })} />
-      <input value={phase.label} onChange={e => onUpdate({ ...phase, label: e.target.value })}
-        style={{ background: "#060e18", border: "1px solid #1e3a5f", borderRadius: 5, color: "#c8d8e8", padding: "4px 6px", fontSize: 11, outline: "none", fontFamily: "inherit", width: "100%" }} />
-      <NumCell value={phase.fromAge} min={currentAge} max={99} onChange={v => onUpdate({ ...phase, fromAge: v })} />
-      <span style={{ color: "#334455", fontSize: 10, textAlign: "center" }}>→</span>
-      <NumCell value={phase.toAge} min={phase.fromAge + 1} max={100} onChange={v => onUpdate({ ...phase, toAge: v })} />
-      <NumCell value={phase.monthly} min={0} max={9999} onChange={v => onUpdate({ ...phase, monthly: v })} />
-      <div style={{ position: "relative" }}>
-        <input type="number" value={phase.takeRate ?? defaultTakeRate} min={0} max={100}
-          onChange={e => onUpdate({ ...phase, takeRate: Number(e.target.value) })}
-          style={{ width: "100%", background: "#0a1800", border: "1px solid #2a3a1a", borderRadius: 5, color: "#aaddaa", padding: "4px 14px 4px 5px", fontSize: 11, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} />
-        <span style={{ position: "absolute", right: 4, top: "50%", transform: "translateY(-50%)", fontSize: 9, color: "#556644" }}>%</span>
+    <div style={{ background: "#060e18", border: `1px solid ${phase.enabled ? c + "55" : "#1e3a5f"}`, borderRadius: 10, padding: "12px 13px", marginBottom: 8, position: "relative", opacity: phase.enabled ? 1 : 0.5 }}>
+      {/* ヘッダー行 */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+          <div style={{ width: 10, height: 10, borderRadius: "50%", background: phase.enabled ? c : "#334455", cursor: "pointer", flexShrink: 0 }}
+            onClick={() => onUpdate({ ...phase, enabled: !phase.enabled })} />
+          <input value={phase.label} onChange={e => onUpdate({ ...phase, label: e.target.value })}
+            style={{ background: "transparent", border: "none", borderBottom: `1px solid ${c}44`, color: "#e8f0fe", padding: "2px 4px", fontSize: 13, fontWeight: 700, outline: "none", fontFamily: "inherit", width: 140 }} />
+        </div>
+        <button onClick={onDelete} style={{ background: "none", border: "none", color: "#334455", cursor: "pointer", fontSize: 14, padding: 0, lineHeight: 1 }}>✕</button>
       </div>
-      <button onClick={onDelete} style={{ background: "none", border: "none", color: "#334455", cursor: "pointer", fontSize: 13, padding: 0, lineHeight: 1 }}>✕</button>
+      {/* 数値グリッド */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+        <div>
+          <div style={{ fontSize: 10, color: "#445566", marginBottom: 4 }}>開始年齢</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
+            <input type="number" value={phase.fromAge} min={currentAge} max={99}
+              onChange={e => onUpdate({ ...phase, fromAge: Number(e.target.value) })}
+              style={{ width: "100%", background: "#0a1520", border: "1px solid #1e3a5f", borderRadius: 6, color: "#e8f0fe", padding: "6px 8px", fontSize: 13, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} />
+            <span style={{ fontSize: 11, color: "#445566" }}>歳</span>
+          </div>
+        </div>
+        <div>
+          <div style={{ fontSize: 10, color: "#445566", marginBottom: 4 }}>終了年齢</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
+            <input type="number" value={phase.toAge} min={phase.fromAge + 1} max={100}
+              onChange={e => onUpdate({ ...phase, toAge: Number(e.target.value) })}
+              style={{ width: "100%", background: "#0a1520", border: "1px solid #1e3a5f", borderRadius: 6, color: "#e8f0fe", padding: "6px 8px", fontSize: 13, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} />
+            <span style={{ fontSize: 11, color: "#445566" }}>歳</span>
+          </div>
+        </div>
+        <div>
+          <div style={{ fontSize: 10, color: "#445566", marginBottom: 4 }}>月額</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
+            <input type="number" value={phase.monthly} min={0} max={9999}
+              onChange={e => onUpdate({ ...phase, monthly: Number(e.target.value) })}
+              style={{ width: "100%", background: "#0a1520", border: "1px solid #1e3a5f", borderRadius: 6, color: "#e8f0fe", padding: "6px 8px", fontSize: 13, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} />
+            <span style={{ fontSize: 11, color: "#445566" }}>万</span>
+          </div>
+        </div>
+      </div>
+      {/* 手取り率 */}
+      <div style={{ marginTop: 10 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+          <span style={{ fontSize: 10, color: "#445566" }}>手取り率</span>
+          <span style={{ fontSize: 14, fontWeight: 700, color: "#aaddaa" }}>{takeRate}%</span>
+        </div>
+        <input type="range" min={50} max={100} step={1} value={takeRate}
+          onChange={e => onUpdate({ ...phase, takeRate: Number(e.target.value) })}
+          style={{ width: "100%", accentColor: c, cursor: "pointer" }} />
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#2a3a2a" }}>
+          <span>50%</span><span>100%</span>
+        </div>
+        <div style={{ marginTop: 5, fontSize: 11, color: "#aaddaa" }}>
+          手取り → <span style={{ fontWeight: 700, color: c }}>{Math.round(phase.monthly * takeRate / 100)}万/月</span>
+          <span style={{ color: "#334455", marginLeft: 6 }}>（税等 {Math.round(phase.monthly * (100 - takeRate) / 100)}万/月）</span>
+        </div>
+      </div>
     </div>
   );
 };
@@ -901,17 +944,15 @@ export default function App() {
           <div style={{ background: "#001510", border: "1px solid #2adf9018", borderRadius: 7, padding: "5px 9px", marginBottom: 8, fontSize: 10, color: "#445566" }}>
             各フェーズで個別設定がない場合にこの値が使われます
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "14px 1fr 46px 8px 46px 52px 42px 20px", gap: 4, marginBottom: 5 }}>
-            <span /><span style={{ ...S, fontSize: 10 }}>名称</span><span style={{ ...S, fontSize: 10 }}>開始</span><span />
-            <span style={{ ...S, fontSize: 10 }}>終了</span><span style={{ ...S, fontSize: 10 }}>万/月</span><span style={{ ...S, fontSize: 10 }}>手取%</span><span />
-          </div>
           {incomePhases.map((ph, idx) => (
             <PhaseRow key={ph.id} phase={ph} idx={idx}
               onUpdate={u => setIncomePhases(ps => ps.map(p => p.id === ph.id ? u : p))}
               onDelete={() => setIncomePhases(ps => ps.filter(p => p.id !== ph.id))}
               currentAge={currentAge} defaultTakeRate={defaultTakeRate} />
           ))}
-          <AddBtn onClick={() => { const last = incomePhases[incomePhases.length - 1]; setIncomePhases(ps => [...ps, { id: nextPhaseId, label: "収入フェーズ", fromAge: last?.toAge ?? currentAge, toAge: (last?.toAge ?? currentAge) + 5, monthly: 50, enabled: true, takeRate: defaultTakeRate }]); setNextPhaseId(n => n + 1); }} color="#2adf90">＋ フェーズを追加</AddBtn>
+          {incomePhases.length < 3 && (
+            <AddBtn onClick={() => { const last = incomePhases[incomePhases.length - 1]; setIncomePhases(ps => [...ps, { id: nextPhaseId, label: "収入フェーズ", fromAge: last?.toAge ?? currentAge, toAge: (last?.toAge ?? currentAge) + 5, monthly: 50, enabled: true, takeRate: defaultTakeRate }]); setNextPhaseId(n => n + 1); }} color="#2adf90">＋ フェーズを追加（最大3件）</AddBtn>
+          )}
           <div style={{ marginTop: 11, background: "#001510", border: "1px solid #2adf9018", borderRadius: 7, padding: "8px 10px" }}>
             {incomePhases.filter(p => p.enabled).map((p, i) => (
               <InfoRow key={p.id} label={`${p.fromAge}→${p.toAge}歳: ${p.label}`} value={`${p.monthly}万/月`} color={PHASE_COLORS[i % PHASE_COLORS.length]} />
