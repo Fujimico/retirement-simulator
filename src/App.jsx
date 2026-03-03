@@ -27,6 +27,8 @@ function simulate({
   privatePensionAge, privatePensionAmount, privatePensionYears,
   saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType,
   salePostSalary, salePostSalaryYears,
+  oneTimeIncomes, cashBufferMonths,
+  defaultTakeRate, pensionSlideRate,
 }) {
   const MAX = 100;
   const points = [];
@@ -59,20 +61,30 @@ function simulate({
     }
     annualExpense += oneTimeExp;
 
-    // 収入
+    // 収入（手取り率・マクロ経済スライド適用）
     let annualIncome = 0;
     for (const ph of incomePhases) {
-      if (ph.enabled && age >= ph.fromAge && age < ph.toAge)
-        annualIncome += ph.monthly * 12 * 1e4;
+      if (ph.enabled && age >= ph.fromAge && age < ph.toAge) {
+        const rate = (ph.takeRate ?? defaultTakeRate) / 100;
+        annualIncome += ph.monthly * 12 * 1e4 * rate;
+      }
     }
     if (age >= privatePensionAge && age < privatePensionAge + privatePensionYears)
       annualIncome += privatePensionAmount * 12 * 1e4;
-    if (age >= pensionAge) annualIncome += pensionAmount * 12 * 1e4;
+    if (age >= pensionAge) {
+      const slideYears = age - pensionAge;
+      const slideFactor = Math.pow(1 + pensionSlideRate / 100, slideYears);
+      annualIncome += pensionAmount * 12 * 1e4 * slideFactor;
+    }
     if (saleEnabled && age >= saleSaleAge && age < saleSaleAge + salePostSalaryYears)
       annualIncome += salePostSalary * 12 * 1e4;
 
     const saleEvent = saleEnabled && age === saleSaleAge ? saleProceeds : 0;
-    const totalIncome = annualIncome + saleEvent;
+    let oneTimeInc = 0;
+    for (const ev of oneTimeIncomes) {
+      if (ev.enabled && age === ev.age) oneTimeInc += ev.amount * 1e4;
+    }
+    const totalIncome = annualIncome + saleEvent + oneTimeInc;
 
     // 収入を比率で按分
     investBucket += totalIncome * investRatio;
@@ -80,6 +92,14 @@ function simulate({
 
     // 運用バケツに利回り
     investBucket *= (1 + returnRate / 100);
+
+    // 手元バケツ補充リバランス（下限＝生活費×cashBufferMonths）
+    const cashFloor = monthlyExp * cashBufferMonths * 1e4;
+    if (cashBucket < cashFloor && investBucket > 0) {
+      const topUp = Math.min(cashFloor - cashBucket, investBucket);
+      cashBucket += topUp;
+      investBucket -= topUp;
+    }
 
     // 支出: 手元から優先、不足分は運用から補填
     const fromCash = Math.min(cashBucket, annualExpense);
@@ -191,6 +211,7 @@ const CustomTooltip = ({ active, payload, label }) => {
         {(d?.loanPayment ?? 0) > 0 && <InfoRow label="うちローン" value={fmtFull(d.loanPayment)} color="#aa88ff" />}
         {(d?.oneTimeExpense ?? 0) > 0 && <InfoRow label="うち突発" value={fmtFull(d.oneTimeExpense)} color="#ff6644" />}
         {(d?.saleEvent ?? 0) > 0 && <InfoRow label="売却手取" value={fmtFull(d.saleEvent)} color="#f0c060" />}
+        {(d?.oneTimeIncome ?? 0) > 0 && <InfoRow label="一時収入" value={`+${fmtFull(d.oneTimeIncome)}`} color="#2adf90" />}
       </div>
     </div>
   );
@@ -198,10 +219,10 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 const PHASE_COLORS = ["#2adf90", "#4a9eff", "#aa88ff", "#ff9966", "#ffcc44"];
 
-const PhaseRow = ({ phase, idx, onUpdate, onDelete, currentAge }) => {
+const PhaseRow = ({ phase, idx, onUpdate, onDelete, currentAge, defaultTakeRate }) => {
   const c = PHASE_COLORS[idx % PHASE_COLORS.length];
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "14px 1fr 46px 8px 46px 52px 20px", gap: 4, alignItems: "center", marginBottom: 6 }}>
+    <div style={{ display: "grid", gridTemplateColumns: "14px 1fr 46px 8px 46px 52px 42px 20px", gap: 4, alignItems: "center", marginBottom: 6 }}>
       <div style={{ width: 8, height: 8, borderRadius: "50%", background: phase.enabled ? c : "#334455", margin: "0 auto", cursor: "pointer" }}
         onClick={() => onUpdate({ ...phase, enabled: !phase.enabled })} />
       <input value={phase.label} onChange={e => onUpdate({ ...phase, label: e.target.value })}
@@ -210,6 +231,12 @@ const PhaseRow = ({ phase, idx, onUpdate, onDelete, currentAge }) => {
       <span style={{ color: "#334455", fontSize: 10, textAlign: "center" }}>→</span>
       <NumCell value={phase.toAge} min={phase.fromAge + 1} max={100} onChange={v => onUpdate({ ...phase, toAge: v })} />
       <NumCell value={phase.monthly} min={0} max={9999} onChange={v => onUpdate({ ...phase, monthly: v })} />
+      <div style={{ position: "relative" }}>
+        <input type="number" value={phase.takeRate ?? defaultTakeRate} min={0} max={100}
+          onChange={e => onUpdate({ ...phase, takeRate: Number(e.target.value) })}
+          style={{ width: "100%", background: "#0a1800", border: "1px solid #2a3a1a", borderRadius: 5, color: "#aaddaa", padding: "4px 14px 4px 5px", fontSize: 11, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} />
+        <span style={{ position: "absolute", right: 4, top: "50%", transform: "translateY(-50%)", fontSize: 9, color: "#556644" }}>%</span>
+      </div>
       <button onClick={onDelete} style={{ background: "none", border: "none", color: "#334455", cursor: "pointer", fontSize: 13, padding: 0, lineHeight: 1 }}>✕</button>
     </div>
   );
@@ -327,8 +354,8 @@ export default function App() {
   const [investedAssets, setInvestedAssets] = useState(3000);
 
   const [incomePhases, setIncomePhases] = useState([
-    { id: 1, label: "役員報酬", fromAge: 45, toAge: 52, monthly: 150, enabled: true },
-    { id: 2, label: "引継ぎ・その他収入", fromAge: 52, toAge: 60, monthly: 30, enabled: true },
+    { id: 1, label: "役員報酬", fromAge: 45, toAge: 52, monthly: 150, enabled: true, takeRate: 75 },
+    { id: 2, label: "引継ぎ・その他収入", fromAge: 52, toAge: 60, monthly: 30, enabled: true, takeRate: 80 },
   ]);
   const [nextPhaseId, setNextPhaseId] = useState(3);
 
@@ -341,6 +368,15 @@ export default function App() {
     { id: 1, label: "車の購入", age: 50, amount: 500, enabled: false },
   ]);
   const [nextEventId, setNextEventId] = useState(2);
+
+  const [oneTimeIncomes, setOneTimeIncomes] = useState([
+    { id: 1, label: "退職金", age: 60, amount: 500, enabled: false },
+    { id: 2, label: "相続（実家）", age: 70, amount: 2000, enabled: false },
+  ]);
+  const [nextIncomeEventId, setNextIncomeEventId] = useState(3);
+  const [cashBufferMonths, setCashBufferMonths] = useState(24);
+  const [defaultTakeRate, setDefaultTakeRate] = useState(80);
+  const [pensionSlideRate, setPensionSlideRate] = useState(-0.2);
 
   const [expensePhases, setExpensePhases] = useState([
     { id: 1, label: "アクティブ期", fromAge: 48, toAge: 65, monthly: 42, enabled: true },
@@ -377,6 +413,8 @@ export default function App() {
     expensePhases, inflationRate, returnRate,
     pensionAge, pensionAmount,
     privatePensionAge, privatePensionAmount, privatePensionYears,
+    oneTimeIncomes, cashBufferMonths,
+    defaultTakeRate, pensionSlideRate,
   };
 
   const withSale = useMemo(() => simulate({
@@ -421,11 +459,14 @@ export default function App() {
     saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType,
     salePostSalary, salePostSalaryYears,
     dwzEnabled, dwzTargetAge, dwzTargetAmount,
+    oneTimeIncomes, cashBufferMonths,
+    defaultTakeRate, pensionSlideRate,
   }), [currentAge, totalAssets, investedAssets, incomePhases, loans, oneTimeEvents,
     expensePhases, inflationRate, returnRate, pensionAge, pensionAmount,
     privatePensionAge, privatePensionAmount, privatePensionYears,
     saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType,
-    salePostSalary, salePostSalaryYears, dwzEnabled, dwzTargetAge, dwzTargetAmount]);
+    salePostSalary, salePostSalaryYears, dwzEnabled, dwzTargetAge, dwzTargetAmount,
+    oneTimeIncomes, cashBufferMonths, defaultTakeRate, pensionSlideRate]);
 
   useEffect(() => {
     (async () => {
@@ -477,11 +518,11 @@ export default function App() {
   const LOP = { ...P, borderColor: "#aa88ff33", background: "linear-gradient(160deg,#0d0820,#0a0618)" };
 
   return (
-    <div className="print-page" style={{ minHeight: "100vh", width: "100%", boxSizing: "border-box", background: "#060e18", color: "#c8d8e8", fontFamily: "'DM Mono','Fira Code','Courier New',monospace", padding: "20px 16px" }}>
+    <div className="print-page" style={{ minHeight: "100vh", background: "#060e18", color: "#c8d8e8", fontFamily: "'DM Mono','Fira Code','Courier New',monospace", padding: "20px 16px" }}>
 
       <div style={{ marginBottom: 18 }}>
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 10, letterSpacing: "0.3em", color: "#4a9eff", textTransform: "uppercase", marginBottom: 3 }}>Private Asset Planner v7</div>
+          <div style={{ fontSize: 10, letterSpacing: "0.3em", color: "#4a9eff", textTransform: "uppercase", marginBottom: 3 }}>Private Asset Planner v9</div>
           <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "#e8f0fe" }}>老後資産シミュレーター</h1>
           <div style={{ fontSize: 11, color: "#334455", marginTop: 3 }}>2バケツ方式（運用資産 / 手元資産）対応</div>
         </div>
@@ -844,23 +885,33 @@ export default function App() {
               <SliderInput label="運用資産 利回り（年率）" value={returnRate} min={0} max={10} step={0.1} unit="%" onChange={setReturnRate} accent="#4a9eff" />
               <InfoRow label="うちローン（月）" value={`${totalLoanMonthly}万円`} color="#aa88ff" />
             </div>
+            <SliderInput label="手元バケツ下限（生活費の何ヶ月分）" value={cashBufferMonths} min={0} max={60} step={1} unit="ヶ月" onChange={setCashBufferMonths} accent="#ff8899" />
+            <div style={{ background: "#0a1520", border: "1px solid #1e3a5f22", borderRadius: 7, padding: "6px 9px" }}>
+              <InfoRow label="補充トリガー残高（目安）" value={fmtFull(
+                (() => { const p = expensePhases.filter(x=>x.enabled)[0]; return (p?.monthly ?? 30) * cashBufferMonths * 1e4; })()
+              )} color="#ff8899" />
+            </div>
           </Sec>
         </div>
 
         {/* 収入フェーズ */}
         <div style={IP}>
           <div style={{ fontSize: 10, letterSpacing: "0.13em", textTransform: "uppercase", color: "#2adf90", borderBottom: "1px solid #2adf9025", paddingBottom: 5, marginBottom: 11, fontWeight: 700 }}>収入フェーズ</div>
-          <div style={{ display: "grid", gridTemplateColumns: "14px 1fr 46px 8px 46px 52px 20px", gap: 4, marginBottom: 5 }}>
+          <SliderInput label="デフォルト手取り率" value={defaultTakeRate} min={50} max={100} step={1} unit="%" onChange={setDefaultTakeRate} accent="#2adf90" />
+          <div style={{ background: "#001510", border: "1px solid #2adf9018", borderRadius: 7, padding: "5px 9px", marginBottom: 8, fontSize: 10, color: "#445566" }}>
+            各フェーズで個別設定がない場合にこの値が使われます
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "14px 1fr 46px 8px 46px 52px 42px 20px", gap: 4, marginBottom: 5 }}>
             <span /><span style={{ ...S, fontSize: 10 }}>名称</span><span style={{ ...S, fontSize: 10 }}>開始</span><span />
-            <span style={{ ...S, fontSize: 10 }}>終了</span><span style={{ ...S, fontSize: 10 }}>万/月</span><span />
+            <span style={{ ...S, fontSize: 10 }}>終了</span><span style={{ ...S, fontSize: 10 }}>万/月</span><span style={{ ...S, fontSize: 10 }}>手取%</span><span />
           </div>
           {incomePhases.map((ph, idx) => (
             <PhaseRow key={ph.id} phase={ph} idx={idx}
               onUpdate={u => setIncomePhases(ps => ps.map(p => p.id === ph.id ? u : p))}
               onDelete={() => setIncomePhases(ps => ps.filter(p => p.id !== ph.id))}
-              currentAge={currentAge} />
+              currentAge={currentAge} defaultTakeRate={defaultTakeRate} />
           ))}
-          <AddBtn onClick={() => { const last = incomePhases[incomePhases.length - 1]; setIncomePhases(ps => [...ps, { id: nextPhaseId, label: "収入フェーズ", fromAge: last?.toAge ?? currentAge, toAge: (last?.toAge ?? currentAge) + 5, monthly: 50, enabled: true }]); setNextPhaseId(n => n + 1); }} color="#2adf90">＋ フェーズを追加</AddBtn>
+          <AddBtn onClick={() => { const last = incomePhases[incomePhases.length - 1]; setIncomePhases(ps => [...ps, { id: nextPhaseId, label: "収入フェーズ", fromAge: last?.toAge ?? currentAge, toAge: (last?.toAge ?? currentAge) + 5, monthly: 50, enabled: true, takeRate: defaultTakeRate }]); setNextPhaseId(n => n + 1); }} color="#2adf90">＋ フェーズを追加</AddBtn>
           <div style={{ marginTop: 11, background: "#001510", border: "1px solid #2adf9018", borderRadius: 7, padding: "8px 10px" }}>
             {incomePhases.filter(p => p.enabled).map((p, i) => (
               <InfoRow key={p.id} label={`${p.fromAge}→${p.toAge}歳: ${p.label}`} value={`${p.monthly}万/月`} color={PHASE_COLORS[i % PHASE_COLORS.length]} />
@@ -890,6 +941,29 @@ export default function App() {
               </div>
             )}
           </Sec>
+          <Sec title="突発収入・一時収入" color="#2adf90">
+            <div style={{ fontSize: 10, color: "#556677", marginBottom: 7 }}>退職金・相続・保険金など</div>
+            <div style={{ display: "grid", gridTemplateColumns: "auto 1fr 50px 54px 20px", gap: 4, marginBottom: 5 }}>
+              <span /><span style={{ ...S, fontSize: 10 }}>名称</span><span style={{ ...S, fontSize: 10 }}>年齢</span><span style={{ ...S, fontSize: 10 }}>金額(万)</span><span />
+            </div>
+            {oneTimeIncomes.map(ev => (
+              <div key={ev.id} style={{ display: "grid", gridTemplateColumns: "auto 1fr 50px 54px 20px", gap: 4, alignItems: "center", marginBottom: 6 }}>
+                <Toggle value={ev.enabled} onChange={v => setOneTimeIncomes(es => es.map(e => e.id === ev.id ? { ...e, enabled: v } : e))} color="#2adf90" />
+                <input value={ev.label} onChange={e => setOneTimeIncomes(es => es.map(x => x.id === ev.id ? { ...x, label: e.target.value } : x))}
+                  style={{ background: "#060e18", border: "1px solid #1e3a5f", borderRadius: 5, color: "#c8d8e8", padding: "4px 6px", fontSize: 11, outline: "none", fontFamily: "inherit", width: "100%" }} />
+                <NumCell value={ev.age} min={1} max={100} onChange={v => setOneTimeIncomes(es => es.map(e => e.id === ev.id ? { ...e, age: v } : e))} />
+                <NumCell value={ev.amount} min={0} max={99999} onChange={v => setOneTimeIncomes(es => es.map(e => e.id === ev.id ? { ...e, amount: v } : e))} />
+                <button onClick={() => setOneTimeIncomes(es => es.filter(e => e.id !== ev.id))} style={{ background: "none", border: "none", color: "#334455", cursor: "pointer", fontSize: 13, padding: 0, lineHeight: 1 }}>✕</button>
+              </div>
+            ))}
+            <AddBtn onClick={() => { setOneTimeIncomes(es => [...es, { id: nextIncomeEventId, label: "一時収入", age: currentAge + 10, amount: 500, enabled: true }]); setNextIncomeEventId(n => n + 1); }} color="#2adf90">＋ 一時収入を追加</AddBtn>
+            {oneTimeIncomes.filter(e => e.enabled).length > 0 && (
+              <div style={{ marginTop: 8, background: "#001510", border: "1px solid #2adf9018", borderRadius: 7, padding: "7px 9px" }}>
+                {oneTimeIncomes.filter(e => e.enabled).map(ev => <InfoRow key={ev.id} label={`${ev.age}歳: ${ev.label}`} value={`+${fmtFull(ev.amount * 1e4)}`} color="#2adf90" />)}
+                <InfoRow label="合計" value={`+${fmtFull(oneTimeIncomes.filter(e=>e.enabled).reduce((a,e) => a + e.amount, 0) * 1e4)}`} color="#2adf90" />
+              </div>
+            )}
+          </Sec>
         </div>
 
         {/* 年金 + 売却 */}
@@ -898,6 +972,10 @@ export default function App() {
             <Sec title="公的年金">
               <SliderInput label="受給開始年齢" value={pensionAge} min={60} max={75} step={1} unit="歳" onChange={setPensionAge} />
               <SliderInput label="月額（夫婦合算）" value={pensionAmount} min={5} max={50} step={1} unit="万/月" onChange={setPensionAmount} />
+              <SliderInput label="マクロ経済スライド（年率）" value={pensionSlideRate} min={-1.0} max={0} step={0.1} unit="%" onChange={setPensionSlideRate} accent="#4adfb0" />
+              <div style={{ background: "#001510", border: "1px solid #2adf9018", borderRadius: 7, padding: "6px 9px" }}>
+                <InfoRow label={`受給開始から20年後（${pensionAge+20}歳）`} value={`${(pensionAmount * Math.pow(1 + pensionSlideRate/100, 20)).toFixed(1)}万/月`} color="#4adfb0" />
+              </div>
             </Sec>
             <Sec title="個人年金">
               <SliderInput label="受給開始年齢" value={privatePensionAge} min={55} max={75} step={1} unit="歳" onChange={setPrivatePensionAge} />
@@ -997,7 +1075,7 @@ export default function App() {
       </div>
 
       <div style={{ textAlign: "center", marginTop: 16, fontSize: 10, color: "#2a3a4a" }}>
-        ※ 試算ツール。税務・資産設計は専門家にご相談ください。　v7: シナリオ保存・比較・PDF出力 追加
+        ※ 試算ツール。税務・資産設計は専門家にご相談ください。　v9: 手取り率・マクロ経済スライド 追加
       </div>
     </div>
   );
