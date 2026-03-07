@@ -545,6 +545,13 @@ export default function App() {
     ...simParams, saleEnabled: false, saleSaleAge: 0, saleGross: 0, saleBookValue: 0, saleTaxType: "stock", salePostSalary: 0, salePostSalaryYears: 0
   }), [JSON.stringify(simParams)]);
 
+  // ── 3シナリオ表示
+  const [triMode, setTriMode] = useState(false);
+
+  // ── ストレステスト
+  const [stressMode, setStressMode] = useState(false);
+  const [stressPresetId, setStressPresetId] = useState("asset_shock");
+
   // ── 3シナリオ計算
   const triPessimistic = useMemo(() => triMode ? simulate({
     ...simParams,
@@ -603,13 +610,6 @@ export default function App() {
   const impactAt80 = (withSale.data.find(d => d.age === 80)?.assets ?? 0) - (noSale.data.find(d => d.age === 80)?.assets ?? 0);
   const totalLoanMonthly = loans.filter(l => l.enabled).reduce((a, l) => a + l.monthly, 0);
   const enabledEvents = oneTimeEvents.filter(e => e.enabled);
-
-  // ── 3シナリオ表示
-  const [triMode, setTriMode] = useState(false);
-
-  // ── ストレステスト
-  const [stressMode, setStressMode] = useState(false);
-  const [stressPresetId, setStressPresetId] = useState("asset_shock");
 
   // ── シナリオ保存
   const [savedScenarios, setSavedScenarios] = useState([]);
