@@ -292,6 +292,9 @@ const CustomTooltip = ({ active, payload, label }) => {
         {(d?.oneTimeIncome ?? 0) > 0 && <InfoRow label="一時収入" value={`+${fmtFull(d.oneTimeIncome)}`} color="#2adf90" />}
       </div>
     </div>
+    </div>
+    </div>
+  </div>
   );
 };
 
@@ -313,6 +316,7 @@ const CardNumInput = ({ value, onChange, min = 0, max = 999, suffix = "" }) => {
         style={{ width: "100%", background: "#0a1520", border: "1px solid #1e3a5f", borderRadius: 6, color: "#e8f0fe", padding: "6px 8px", fontSize: 15, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} />
       {suffix && <span style={{ fontSize: 13, color: "#445566" }}>{suffix}</span>}
     </div>
+  </div>
   );
 };
 
@@ -1360,7 +1364,7 @@ export default function App() {
             {/* ストレスライン */}
             {stressMode && stressResult && <Line type="monotone" dataKey="assetsStress" stroke="#ffcc44" strokeWidth={1.5} dot={false} strokeDasharray="4 2" connectNulls />}
           </AreaChart>
-        </ResponsiveContainer>
+        </ResponsiveContainer></div>
       </div>
 
       {/* コントロール */}
@@ -1769,5 +1773,6 @@ export default function App() {
         ※ 試算ツール。税務・資産設計は専門家にご相談ください。　v11: 3シナリオ・ストレステスト・生活言語翻訳 追加
       </div>
     </div>
+  </div>
   );
 }
