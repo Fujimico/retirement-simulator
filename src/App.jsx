@@ -170,13 +170,13 @@ function simulate({
 }
 
 // ── UI パーツ
-const S = { color: "#8899aa", fontSize: 11, letterSpacing: "0.07em", textTransform: "uppercase" };
+const S = { color: "#8899aa", fontSize: 13, letterSpacing: "0.07em", textTransform: "uppercase" };
 
 const SliderInput = ({ label, value, min, max, step, unit, onChange, display, accent = "#4a9eff" }) => (
   <div style={{ marginBottom: 14 }}>
     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
       <span style={S}>{label}</span>
-      <span style={{ color: "#e8f0fe", fontSize: 13, fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
+      <span style={{ color: "#e8f0fe", fontSize: 15, fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
         {display ? display(value) : `${value}${unit}`}
       </span>
     </div>
@@ -184,15 +184,15 @@ const SliderInput = ({ label, value, min, max, step, unit, onChange, display, ac
       onChange={e => onChange(Number(e.target.value))}
       style={{ width: "100%", accentColor: accent, cursor: "pointer" }} />
     <div style={{ display: "flex", justifyContent: "space-between", marginTop: 1 }}>
-      <span style={{ color: "#334455", fontSize: 10 }}>{min}{unit}</span>
-      <span style={{ color: "#334455", fontSize: 10 }}>{max}{unit}</span>
+      <span style={{ color: "#334455", fontSize: 12 }}>{min}{unit}</span>
+      <span style={{ color: "#334455", fontSize: 12 }}>{max}{unit}</span>
     </div>
   </div>
 );
 
 const Sec = ({ title, color = "#4a9eff", children }) => (
   <div style={{ marginBottom: 18 }}>
-    <div style={{ fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color, borderBottom: `1px solid ${color}25`, paddingBottom: 5, marginBottom: 11, fontWeight: 700 }}>{title}</div>
+    <div style={{ fontSize: 12, letterSpacing: "0.14em", textTransform: "uppercase", color, borderBottom: `1px solid ${color}25`, paddingBottom: 5, marginBottom: 11, fontWeight: 700 }}>{title}</div>
     {children}
   </div>
 );
@@ -216,7 +216,7 @@ const NumCell = ({ value, onChange, min = 0, max = 99999 }) => {
         onChange(n);
       }}
       onFocus={e => e.target.select()}
-      style={{ width: "100%", background: "#060e18", border: "1px solid #1e3a5f", borderRadius: 5, color: "#e8f0fe", padding: "4px 6px", fontSize: 12, outline: "none", fontFamily: "inherit", fontVariantNumeric: "tabular-nums" }} />
+      style={{ width: "100%", background: "#060e18", border: "1px solid #1e3a5f", borderRadius: 5, color: "#e8f0fe", padding: "4px 6px", fontSize: 14, outline: "none", fontFamily: "inherit", fontVariantNumeric: "tabular-nums" }} />
   );
 };
 
@@ -224,8 +224,8 @@ const TaxRadio = ({ value, onChange }) => (
   <div style={{ display: "flex", gap: 7, marginBottom: 11 }}>
     {[{ v: "stock", label: "株式譲渡", sub: "20.315%" }, { v: "biz", label: "事業譲渡", sub: "実効~45%" }].map(({ v, label, sub }) => (
       <div key={v} onClick={() => onChange(v)} style={{ flex: 1, border: `1px solid ${value === v ? "#f0a040" : "#1e3a5f"}`, borderRadius: 7, padding: "6px 8px", cursor: "pointer", background: value === v ? "#1a1000" : "#0a1520" }}>
-        <div style={{ fontSize: 11, color: value === v ? "#f0a040" : "#778899", fontWeight: 600 }}>{label}</div>
-        <div style={{ fontSize: 10, color: "#445566" }}>{sub}</div>
+        <div style={{ fontSize: 13, color: value === v ? "#f0a040" : "#778899", fontWeight: 600 }}>{label}</div>
+        <div style={{ fontSize: 12, color: "#445566" }}>{sub}</div>
       </div>
     ))}
   </div>
@@ -233,8 +233,8 @@ const TaxRadio = ({ value, onChange }) => (
 
 const InfoRow = ({ label, value, color = "#8899aa" }) => (
   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-    <span style={{ color: "#556677", fontSize: 11 }}>{label}</span>
-    <span style={{ color, fontSize: 11, fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>{value}</span>
+    <span style={{ color: "#556677", fontSize: 13 }}>{label}</span>
+    <span style={{ color, fontSize: 13, fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>{value}</span>
   </div>
 );
 
@@ -262,14 +262,14 @@ const Tip = ({ term, children }) => {
 
 const StatCard = ({ label, value, color = "#c8d8e8", sub }) => (
   <div style={{ background: "#0a1520", border: "1px solid #1e3a5f", borderRadius: 7, padding: "8px 11px" }}>
-    <div style={{ fontSize: 10, color: "#556677", textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
-    <div style={{ fontSize: 14, fontWeight: 700, color, marginTop: 2, fontVariantNumeric: "tabular-nums" }}>{value}</div>
-    {sub && <div style={{ fontSize: 10, color: "#445566", marginTop: 1 }}>{sub}</div>}
+    <div style={{ fontSize: 12, color: "#556677", textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
+    <div style={{ fontSize: 16, fontWeight: 700, color, marginTop: 2, fontVariantNumeric: "tabular-nums" }}>{value}</div>
+    {sub && <div style={{ fontSize: 12, color: "#445566", marginTop: 1 }}>{sub}</div>}
   </div>
 );
 
 const AddBtn = ({ onClick, color, children }) => (
-  <button onClick={onClick} style={{ display: "flex", alignItems: "center", gap: 5, background: "none", border: `1px dashed ${color}55`, borderRadius: 6, color, fontSize: 11, padding: "5px 10px", cursor: "pointer", width: "100%", justifyContent: "center", fontFamily: "inherit" }}>
+  <button onClick={onClick} style={{ display: "flex", alignItems: "center", gap: 5, background: "none", border: `1px dashed ${color}55`, borderRadius: 6, color, fontSize: 13, padding: "5px 10px", cursor: "pointer", width: "100%", justifyContent: "center", fontFamily: "inherit" }}>
     {children}
   </button>
 );
@@ -278,7 +278,7 @@ const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   const d = payload[0]?.payload;
   return (
-    <div style={{ background: "#080f18", border: "1px solid #1e3a5f", borderRadius: 8, padding: "10px 13px", fontSize: 11, color: "#c8d8e8", minWidth: 215 }}>
+    <div style={{ background: "#080f18", border: "1px solid #1e3a5f", borderRadius: 8, padding: "10px 13px", fontSize: 13, color: "#c8d8e8", minWidth: 215 }}>
       <div style={{ color: "#4a9eff", fontWeight: 700, marginBottom: 6 }}>{label}歳</div>
       <InfoRow label="合計資産" value={fmtFull(d?.assets ?? 0)} color={(d?.assets ?? 0) >= 0 ? "#e8f0fe" : "#ff5577"} />
       <InfoRow label="  うち運用バケツ" value={fmtFull(Math.max(d?.invested ?? 0, 0))} color="#4a9eff" />
@@ -310,8 +310,8 @@ const CardNumInput = ({ value, onChange, min = 0, max = 999, suffix = "" }) => {
           onChange(n);
         }}
         onFocus={e => e.target.select()}
-        style={{ width: "100%", background: "#0a1520", border: "1px solid #1e3a5f", borderRadius: 6, color: "#e8f0fe", padding: "6px 8px", fontSize: 13, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} />
-      {suffix && <span style={{ fontSize: 11, color: "#445566" }}>{suffix}</span>}
+        style={{ width: "100%", background: "#0a1520", border: "1px solid #1e3a5f", borderRadius: 6, color: "#e8f0fe", padding: "6px 8px", fontSize: 15, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} />
+      {suffix && <span style={{ fontSize: 13, color: "#445566" }}>{suffix}</span>}
     </div>
   );
 };
@@ -327,53 +327,53 @@ const PhaseRow = ({ phase, idx, onUpdate, onDelete, currentAge, defaultTakeRate 
           <div style={{ width: 10, height: 10, borderRadius: "50%", background: phase.enabled ? c : "#334455", cursor: "pointer", flexShrink: 0 }}
             onClick={() => onUpdate({ ...phase, enabled: !phase.enabled })} />
           <input value={phase.label} onChange={e => onUpdate({ ...phase, label: e.target.value })}
-            style={{ background: "transparent", border: "none", borderBottom: `1px solid ${c}44`, color: "#e8f0fe", padding: "2px 4px", fontSize: 13, fontWeight: 700, outline: "none", fontFamily: "inherit", width: 140 }} />
+            style={{ background: "transparent", border: "none", borderBottom: `1px solid ${c}44`, color: "#e8f0fe", padding: "2px 4px", fontSize: 15, fontWeight: 700, outline: "none", fontFamily: "inherit", width: 140 }} />
         </div>
-        <button onClick={onDelete} style={{ background: "none", border: "none", color: "#334455", cursor: "pointer", fontSize: 14, padding: 0, lineHeight: 1 }}>✕</button>
+        <button onClick={onDelete} style={{ background: "none", border: "none", color: "#334455", cursor: "pointer", fontSize: 16, padding: 0, lineHeight: 1 }}>✕</button>
       </div>
       {/* 数値グリッド */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
         <div>
-          <div style={{ fontSize: 10, color: "#445566", marginBottom: 4 }}>開始年齢</div>
+          <div style={{ fontSize: 12, color: "#445566", marginBottom: 4 }}>開始年齢</div>
           <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
             <input type="number" value={phase.fromAge} min={currentAge} max={99}
               onChange={e => onUpdate({ ...phase, fromAge: Number(e.target.value) })}
-              style={{ width: "100%", background: "#0a1520", border: "1px solid #1e3a5f", borderRadius: 6, color: "#e8f0fe", padding: "6px 8px", fontSize: 13, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} />
-            <span style={{ fontSize: 11, color: "#445566" }}>歳</span>
+              style={{ width: "100%", background: "#0a1520", border: "1px solid #1e3a5f", borderRadius: 6, color: "#e8f0fe", padding: "6px 8px", fontSize: 15, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} />
+            <span style={{ fontSize: 13, color: "#445566" }}>歳</span>
           </div>
         </div>
         <div>
-          <div style={{ fontSize: 10, color: "#445566", marginBottom: 4 }}>終了年齢</div>
+          <div style={{ fontSize: 12, color: "#445566", marginBottom: 4 }}>終了年齢</div>
           <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
             <input type="number" value={phase.toAge} min={phase.fromAge + 1} max={100}
               onChange={e => onUpdate({ ...phase, toAge: Number(e.target.value) })}
-              style={{ width: "100%", background: "#0a1520", border: "1px solid #1e3a5f", borderRadius: 6, color: "#e8f0fe", padding: "6px 8px", fontSize: 13, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} />
-            <span style={{ fontSize: 11, color: "#445566" }}>歳</span>
+              style={{ width: "100%", background: "#0a1520", border: "1px solid #1e3a5f", borderRadius: 6, color: "#e8f0fe", padding: "6px 8px", fontSize: 15, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} />
+            <span style={{ fontSize: 13, color: "#445566" }}>歳</span>
           </div>
         </div>
         <div>
-          <div style={{ fontSize: 10, color: "#445566", marginBottom: 4 }}>月額</div>
+          <div style={{ fontSize: 12, color: "#445566", marginBottom: 4 }}>月額</div>
           <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
             <input type="number" value={phase.monthly} min={0} max={9999}
               onChange={e => onUpdate({ ...phase, monthly: Number(e.target.value) })}
-              style={{ width: "100%", background: "#0a1520", border: "1px solid #1e3a5f", borderRadius: 6, color: "#e8f0fe", padding: "6px 8px", fontSize: 13, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} />
-            <span style={{ fontSize: 11, color: "#445566" }}>万</span>
+              style={{ width: "100%", background: "#0a1520", border: "1px solid #1e3a5f", borderRadius: 6, color: "#e8f0fe", padding: "6px 8px", fontSize: 15, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} />
+            <span style={{ fontSize: 13, color: "#445566" }}>万</span>
           </div>
         </div>
       </div>
       {/* 手取り率 */}
       <div style={{ marginTop: 10 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-          <span style={{ fontSize: 10, color: "#445566" }}>手取り率</span>
-          <span style={{ fontSize: 14, fontWeight: 700, color: "#aaddaa" }}>{takeRate}%</span>
+          <span style={{ fontSize: 12, color: "#445566" }}>手取り率</span>
+          <span style={{ fontSize: 16, fontWeight: 700, color: "#aaddaa" }}>{takeRate}%</span>
         </div>
         <input type="range" min={50} max={100} step={1} value={takeRate}
           onChange={e => onUpdate({ ...phase, takeRate: Number(e.target.value) })}
           style={{ width: "100%", accentColor: c, cursor: "pointer" }} />
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#2a3a2a" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#2a3a2a" }}>
           <span>50%</span><span>100%</span>
         </div>
-        <div style={{ marginTop: 5, fontSize: 11, color: "#aaddaa" }}>
+        <div style={{ marginTop: 5, fontSize: 13, color: "#aaddaa" }}>
           手取り → <span style={{ fontWeight: 700, color: c }}>{Math.round(phase.monthly * takeRate / 100)}万/月</span>
           <span style={{ color: "#334455", marginLeft: 6 }}>（税等 {Math.round(phase.monthly * (100 - takeRate) / 100)}万/月）</span>
         </div>
@@ -386,10 +386,10 @@ const LoanRow = ({ loan, onUpdate, onDelete }) => (
   <div style={{ display: "grid", gridTemplateColumns: "auto 1fr 50px 46px 20px", gap: 4, alignItems: "center", marginBottom: 6 }}>
     <Toggle value={loan.enabled} onChange={v => onUpdate({ ...loan, enabled: v })} color="#aa88ff" />
     <input value={loan.label} onChange={e => onUpdate({ ...loan, label: e.target.value })}
-      style={{ background: "#060e18", border: "1px solid #1e3a5f", borderRadius: 5, color: "#c8d8e8", padding: "4px 6px", fontSize: 11, outline: "none", fontFamily: "inherit", width: "100%" }} />
+      style={{ background: "#060e18", border: "1px solid #1e3a5f", borderRadius: 5, color: "#c8d8e8", padding: "4px 6px", fontSize: 13, outline: "none", fontFamily: "inherit", width: "100%" }} />
     <NumCell value={loan.monthly} min={0} max={999} onChange={v => onUpdate({ ...loan, monthly: v })} />
     <NumCell value={loan.endAge} min={1} max={100} onChange={v => onUpdate({ ...loan, endAge: v })} />
-    <button onClick={onDelete} style={{ background: "none", border: "none", color: "#334455", cursor: "pointer", fontSize: 13, padding: 0, lineHeight: 1 }}>✕</button>
+    <button onClick={onDelete} style={{ background: "none", border: "none", color: "#334455", cursor: "pointer", fontSize: 15, padding: 0, lineHeight: 1 }}>✕</button>
   </div>
 );
 
@@ -397,10 +397,10 @@ const EventRow = ({ ev, onUpdate, onDelete }) => (
   <div style={{ display: "grid", gridTemplateColumns: "auto 1fr 50px 54px 20px", gap: 4, alignItems: "center", marginBottom: 6 }}>
     <Toggle value={ev.enabled} onChange={v => onUpdate({ ...ev, enabled: v })} color="#ff6644" />
     <input value={ev.label} onChange={e => onUpdate({ ...ev, label: e.target.value })}
-      style={{ background: "#060e18", border: "1px solid #1e3a5f", borderRadius: 5, color: "#c8d8e8", padding: "4px 6px", fontSize: 11, outline: "none", fontFamily: "inherit", width: "100%" }} />
+      style={{ background: "#060e18", border: "1px solid #1e3a5f", borderRadius: 5, color: "#c8d8e8", padding: "4px 6px", fontSize: 13, outline: "none", fontFamily: "inherit", width: "100%" }} />
     <NumCell value={ev.age} min={1} max={100} onChange={v => onUpdate({ ...ev, age: v })} />
     <NumCell value={ev.amount} min={0} max={99999} onChange={v => onUpdate({ ...ev, amount: v })} />
-    <button onClick={onDelete} style={{ background: "none", border: "none", color: "#334455", cursor: "pointer", fontSize: 13, padding: 0, lineHeight: 1 }}>✕</button>
+    <button onClick={onDelete} style={{ background: "none", border: "none", color: "#334455", cursor: "pointer", fontSize: 15, padding: 0, lineHeight: 1 }}>✕</button>
   </div>
 );
 
@@ -410,25 +410,25 @@ const StockCalc = ({ onApply }) => {
   const gross = Math.round(shares * price / 1e4);
   return (
     <div style={{ background: "#0a0800", border: "1px solid #f0a04030", borderRadius: 8, padding: "10px 12px", marginBottom: 12 }}>
-      <div style={{ fontSize: 10, color: "#aa7722", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8, fontWeight: 700 }}>株数 × 単価 → グロス計算</div>
+      <div style={{ fontSize: 12, color: "#aa7722", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8, fontWeight: 700 }}>株数 × 単価 → グロス計算</div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
         <div>
-          <div style={{ ...S, fontSize: 10, marginBottom: 3 }}>株数</div>
+          <div style={{ ...S, fontSize: 12, marginBottom: 3 }}>株数</div>
           <input type="number" value={shares} min={1} onChange={e => setShares(Number(e.target.value))}
-            style={{ width: "100%", background: "#060e18", border: "1px solid #2a1e00", borderRadius: 5, color: "#e8f0fe", padding: "5px 7px", fontSize: 12, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} />
+            style={{ width: "100%", background: "#060e18", border: "1px solid #2a1e00", borderRadius: 5, color: "#e8f0fe", padding: "5px 7px", fontSize: 14, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} />
         </div>
         <div>
-          <div style={{ ...S, fontSize: 10, marginBottom: 3 }}>単価（円/株）</div>
+          <div style={{ ...S, fontSize: 12, marginBottom: 3 }}>単価（円/株）</div>
           <input type="number" value={price} min={1} onChange={e => setPrice(Number(e.target.value))}
-            style={{ width: "100%", background: "#060e18", border: "1px solid #2a1e00", borderRadius: 5, color: "#e8f0fe", padding: "5px 7px", fontSize: 12, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} />
+            style={{ width: "100%", background: "#060e18", border: "1px solid #2a1e00", borderRadius: 5, color: "#e8f0fe", padding: "5px 7px", fontSize: 14, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} />
         </div>
       </div>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
-          <span style={{ color: "#667788", fontSize: 10 }}>売却総額 → </span>
-          <span style={{ color: "#f0c060", fontWeight: 700, fontSize: 14, fontVariantNumeric: "tabular-nums" }}>{fmtFull(gross * 1e4)}</span>
+          <span style={{ color: "#667788", fontSize: 12 }}>売却総額 → </span>
+          <span style={{ color: "#f0c060", fontWeight: 700, fontSize: 16, fontVariantNumeric: "tabular-nums" }}>{fmtFull(gross * 1e4)}</span>
         </div>
-        <button onClick={() => onApply(gross)} style={{ background: "#2a1800", border: "1px solid #f0a04066", borderRadius: 6, color: "#f0a040", fontSize: 11, padding: "5px 10px", cursor: "pointer", fontFamily: "inherit", fontWeight: 600 }}>
+        <button onClick={() => onApply(gross)} style={{ background: "#2a1800", border: "1px solid #f0a04066", borderRadius: 6, color: "#f0a040", fontSize: 13, padding: "5px 10px", cursor: "pointer", fontFamily: "inherit", fontWeight: 600 }}>
           ↑ 上に反映
         </button>
       </div>
@@ -444,26 +444,26 @@ const BucketBar = ({ totalAssets, investedAssets, onChange }) => {
   return (
     <div style={{ marginBottom: 16 }}>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-        <span style={{ ...S, fontSize: 10 }}>資産配分（運用 / 手元）</span>
-        <span style={{ color: "#e8f0fe", fontSize: 12, fontWeight: 600 }}>{investPct}% / {100 - investPct}%</span>
+        <span style={{ ...S, fontSize: 12 }}>資産配分（運用 / 手元）</span>
+        <span style={{ color: "#e8f0fe", fontSize: 14, fontWeight: 600 }}>{investPct}% / {100 - investPct}%</span>
       </div>
       {/* ビジュアルバー */}
       <div style={{ height: 22, borderRadius: 6, overflow: "hidden", display: "flex", border: "1px solid #1e3a5f", marginBottom: 8 }}>
         <div style={{ width: `${investPct}%`, background: "linear-gradient(90deg,#1a4a8a,#2a6adf)", display: "flex", alignItems: "center", justifyContent: "center", transition: "width 0.2s", minWidth: investPct > 5 ? "auto" : 0 }}>
-          {investPct > 10 && <span style={{ fontSize: 10, color: "#9ac8ff", fontWeight: 600 }}>運用 {fmtFull(invested * 1e4)}</span>}
+          {investPct > 10 && <span style={{ fontSize: 12, color: "#9ac8ff", fontWeight: 600 }}>運用 {fmtFull(invested * 1e4)}</span>}
         </div>
         <div style={{ flex: 1, background: "linear-gradient(90deg,#0a3028,#0d4038)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          {(100 - investPct) > 10 && <span style={{ fontSize: 10, color: "#6ad8a8", fontWeight: 600 }}>手元 {fmtFull(cash * 1e4)}</span>}
+          {(100 - investPct) > 10 && <span style={{ fontSize: 12, color: "#6ad8a8", fontWeight: 600 }}>手元 {fmtFull(cash * 1e4)}</span>}
         </div>
       </div>
       {/* 運用額スライダー */}
-      <div style={{ ...S, fontSize: 10, marginBottom: 3 }}>運用資産額</div>
+      <div style={{ ...S, fontSize: 12, marginBottom: 3 }}>運用資産額</div>
       <input type="range" min={0} max={totalAssets} step={100} value={invested}
         onChange={e => onChange(Number(e.target.value))}
         style={{ width: "100%", accentColor: "#4a9eff", cursor: "pointer" }} />
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: 1 }}>
-        <span style={{ color: "#334455", fontSize: 10 }}>0（全額手元）</span>
-        <span style={{ color: "#334455", fontSize: 10 }}>{fmtFull(totalAssets * 1e4)}（全額運用）</span>
+        <span style={{ color: "#334455", fontSize: 12 }}>0（全額手元）</span>
+        <span style={{ color: "#334455", fontSize: 12 }}>{fmtFull(totalAssets * 1e4)}（全額運用）</span>
       </div>
     </div>
   );
@@ -831,31 +831,30 @@ export default function App() {
 
       <div style={{ marginBottom: 18 }}>
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 10, letterSpacing: "0.3em", color: "#4a9eff", textTransform: "uppercase", marginBottom: 3 }}>Private Asset Planner v12</div>
-          <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "#e8f0fe" }}>老後資産シミュレーター</h1>
-          <div style={{ fontSize: 11, color: "#334455", marginTop: 3 }}>2バケツ方式（運用資産 / 手元資産）対応</div>
+          <h1 style={{ margin: 0, fontSize: 23, fontWeight: 700, color: "#e8f0fe" }}>老後資産シミュレーター</h1>
+          <div style={{ fontSize: 13, color: "#334455", marginTop: 3 }}>2バケツ方式（運用資産 / 手元資産）対応</div>
         </div>
         <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 12 }}>
           <button onClick={() => setShowSaveModal(true)}
-            style={{ background: "#0a1e14", border: "1px solid #2adf9066", borderRadius: 8, color: "#2adf90", fontSize: 11, padding: "7px 16px", cursor: "pointer", fontFamily: "inherit", fontWeight: 700 }}>
+            style={{ background: "#0a1e14", border: "1px solid #2adf9066", borderRadius: 8, color: "#2adf90", fontSize: 13, padding: "7px 16px", cursor: "pointer", fontFamily: "inherit", fontWeight: 700 }}>
             💾 シナリオを保存
           </button>
           <button onClick={handlePrint} className="no-print"
-            style={{ background: "#0a1520", border: "1px solid #4a9eff66", borderRadius: 8, color: "#4a9eff", fontSize: 11, padding: "7px 16px", cursor: "pointer", fontFamily: "inherit", fontWeight: 700 }}>
+            style={{ background: "#0a1520", border: "1px solid #4a9eff66", borderRadius: 8, color: "#4a9eff", fontSize: 13, padding: "7px 16px", cursor: "pointer", fontFamily: "inherit", fontWeight: 700 }}>
             📄 PDFで保存
           </button>
           {savedScenarios.length > 0 && (
             <button onClick={() => setCompareMode(m => !m)}
-              style={{ background: compareMode ? "#1a0e30" : "#0a1520", border: `1px solid ${compareMode ? "#aa88ff" : "#1e3a5f"}`, borderRadius: 8, color: compareMode ? "#aa88ff" : "#556677", fontSize: 11, padding: "7px 16px", cursor: "pointer", fontFamily: "inherit", fontWeight: 700 }}>
+              style={{ background: compareMode ? "#1a0e30" : "#0a1520", border: `1px solid ${compareMode ? "#aa88ff" : "#1e3a5f"}`, borderRadius: 8, color: compareMode ? "#aa88ff" : "#556677", fontSize: 13, padding: "7px 16px", cursor: "pointer", fontFamily: "inherit", fontWeight: 700 }}>
               ⚖ 比較モード {savedScenarios.length > 0 ? `(${savedScenarios.length})` : ""}
             </button>
           )}
           <button onClick={() => setTriMode(m => !m)}
-            style={{ background: triMode ? "#0d2010" : "#0a1520", border: `1px solid ${triMode ? "#2adf90" : "#1e3a5f"}`, borderRadius: 8, color: triMode ? "#2adf90" : "#556677", fontSize: 11, padding: "7px 16px", cursor: "pointer", fontFamily: "inherit", fontWeight: 700 }}>
+            style={{ background: triMode ? "#0d2010" : "#0a1520", border: `1px solid ${triMode ? "#2adf90" : "#1e3a5f"}`, borderRadius: 8, color: triMode ? "#2adf90" : "#556677", fontSize: 13, padding: "7px 16px", cursor: "pointer", fontFamily: "inherit", fontWeight: 700 }}>
             📊 3シナリオ
           </button>
           <button onClick={() => setStressMode(m => !m)}
-            style={{ background: stressMode ? "#1a1200" : "#0a1520", border: `1px solid ${stressMode ? "#ffcc44" : "#1e3a5f"}`, borderRadius: 8, color: stressMode ? "#ffcc44" : "#556677", fontSize: 11, padding: "7px 16px", cursor: "pointer", fontFamily: "inherit", fontWeight: 700 }}>
+            style={{ background: stressMode ? "#1a1200" : "#0a1520", border: `1px solid ${stressMode ? "#ffcc44" : "#1e3a5f"}`, borderRadius: 8, color: stressMode ? "#ffcc44" : "#556677", fontSize: 13, padding: "7px 16px", cursor: "pointer", fontFamily: "inherit", fontWeight: 700 }}>
             ⚡ ストレス
           </button>
         </div>
@@ -865,19 +864,19 @@ export default function App() {
       {showSaveModal && (
         <div style={{ position: "fixed", inset: 0, background: "#000a", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <div style={{ background: "#0d1b2a", border: "1px solid #2adf9066", borderRadius: 14, padding: "24px 28px", minWidth: 300 }}>
-            <div style={{ fontSize: 13, color: "#2adf90", fontWeight: 700, marginBottom: 14 }}>シナリオ名を入力</div>
+            <div style={{ fontSize: 15, color: "#2adf90", fontWeight: 700, marginBottom: 14 }}>シナリオ名を入力</div>
             <input value={saveNameInput} onChange={e => setSaveNameInput(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter" && saveNameInput.trim()) saveScenario(saveNameInput.trim()); }}
               placeholder="例：楽観シナリオ"
-              style={{ width: "100%", background: "#060e18", border: "1px solid #1e3a5f", borderRadius: 7, color: "#e8f0fe", padding: "8px 10px", fontSize: 13, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }}
+              style={{ width: "100%", background: "#060e18", border: "1px solid #1e3a5f", borderRadius: 7, color: "#e8f0fe", padding: "8px 10px", fontSize: 15, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }}
               autoFocus />
             <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
               <button onClick={() => saveNameInput.trim() && saveScenario(saveNameInput.trim())}
-                style={{ flex: 1, background: "#0a2a1a", border: "1px solid #2adf9088", borderRadius: 7, color: "#2adf90", fontSize: 12, padding: "8px", cursor: "pointer", fontFamily: "inherit", fontWeight: 700 }}>
+                style={{ flex: 1, background: "#0a2a1a", border: "1px solid #2adf9088", borderRadius: 7, color: "#2adf90", fontSize: 14, padding: "8px", cursor: "pointer", fontFamily: "inherit", fontWeight: 700 }}>
                 保存
               </button>
               <button onClick={() => { setShowSaveModal(false); setSaveNameInput(""); }}
-                style={{ flex: 1, background: "#0a1520", border: "1px solid #1e3a5f", borderRadius: 7, color: "#556677", fontSize: 12, padding: "8px", cursor: "pointer", fontFamily: "inherit" }}>
+                style={{ flex: 1, background: "#0a1520", border: "1px solid #1e3a5f", borderRadius: 7, color: "#556677", fontSize: 14, padding: "8px", cursor: "pointer", fontFamily: "inherit" }}>
                 キャンセル
               </button>
             </div>
@@ -888,16 +887,16 @@ export default function App() {
       {/* 比較モード */}
       {compareMode && savedScenarios.length > 0 && (
         <div style={{ background: "linear-gradient(160deg,#0d0820,#0a0618)", border: "1px solid #aa88ff44", borderRadius: 12, padding: "16px 15px", marginBottom: 12 }}>
-          <div style={{ fontSize: 10, letterSpacing: "0.13em", textTransform: "uppercase", color: "#aa88ff", marginBottom: 12, fontWeight: 700 }}>⚖ シナリオ比較</div>
+          <div style={{ fontSize: 12, letterSpacing: "0.13em", textTransform: "uppercase", color: "#aa88ff", marginBottom: 12, fontWeight: 700 }}>⚖ シナリオ比較</div>
           <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11, minWidth: 500 }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 500 }}>
               <thead>
                 <tr>
-                  <th style={{ color: "#445566", fontSize: 10, textAlign: "left", paddingBottom: 6, borderBottom: "1px solid #1e3a5f", paddingRight: 12 }}>シナリオ</th>
+                  <th style={{ color: "#445566", fontSize: 12, textAlign: "left", paddingBottom: 6, borderBottom: "1px solid #1e3a5f", paddingRight: 12 }}>シナリオ</th>
                   {[65, 70, 75, 80, 85, 90, 95].map(a => (
-                    <th key={a} style={{ color: "#445566", fontSize: 10, textAlign: "right", paddingBottom: 6, borderBottom: "1px solid #1e3a5f", paddingLeft: 8 }}>{a}歳</th>
+                    <th key={a} style={{ color: "#445566", fontSize: 12, textAlign: "right", paddingBottom: 6, borderBottom: "1px solid #1e3a5f", paddingLeft: 8 }}>{a}歳</th>
                   ))}
-                  <th style={{ color: "#445566", fontSize: 10, textAlign: "right", paddingBottom: 6, borderBottom: "1px solid #1e3a5f", paddingLeft: 8 }}>枯渇</th>
+                  <th style={{ color: "#445566", fontSize: 12, textAlign: "right", paddingBottom: 6, borderBottom: "1px solid #1e3a5f", paddingLeft: 8 }}>枯渇</th>
                   <th style={{ paddingBottom: 6, borderBottom: "1px solid #1e3a5f", paddingLeft: 8 }} />
                 </tr>
               </thead>
@@ -907,7 +906,7 @@ export default function App() {
                   const color = "#e8f0fe";
                   return (
                     <tr>
-                      <td style={{ color, paddingTop: 8, paddingRight: 12, fontSize: 11 }}>
+                      <td style={{ color, paddingTop: 8, paddingRight: 12, fontSize: 13 }}>
                         <div style={{ fontWeight: 700 }}>◉ 現在の設定</div>
                       </td>
                       {[65, 70, 75, 80, 85, 90, 95].map(a => {
@@ -933,16 +932,16 @@ export default function App() {
                   return (
                     <tr key={sc.id}>
                       <td style={{ paddingTop: 8, paddingRight: 12 }}>
-                        <div style={{ color, fontWeight: 600, fontSize: 11 }}>{sc.name}</div>
-                        <div style={{ color: "#334455", fontSize: 9 }}>{sc.savedAt}</div>
+                        <div style={{ color, fontWeight: 600, fontSize: 13 }}>{sc.name}</div>
+                        <div style={{ color: "#334455", fontSize: 11 }}>{sc.savedAt}</div>
                       </td>
                       {[65, 70, 75, 80, 85, 90, 95].map(a => {
                         const v = res.data.find(d => d.age === a)?.assets ?? 0;
-                        return <td key={a} style={{ textAlign: "right", paddingTop: 8, paddingLeft: 8, color: v > 0 ? color : "#ff5577", fontVariantNumeric: "tabular-nums", fontSize: 11 }}>{fmtFull(Math.max(v, 0))}</td>;
+                        return <td key={a} style={{ textAlign: "right", paddingTop: 8, paddingLeft: 8, color: v > 0 ? color : "#ff5577", fontVariantNumeric: "tabular-nums", fontSize: 13 }}>{fmtFull(Math.max(v, 0))}</td>;
                       })}
-                      <td style={{ textAlign: "right", paddingTop: 8, paddingLeft: 8, color: safe ? "#4adfb0" : "#ff5577", fontSize: 11 }}>{safe ? "安全" : `${res.depletionAge}歳`}</td>
+                      <td style={{ textAlign: "right", paddingTop: 8, paddingLeft: 8, color: safe ? "#4adfb0" : "#ff5577", fontSize: 13 }}>{safe ? "安全" : `${res.depletionAge}歳`}</td>
                       <td style={{ paddingTop: 8, paddingLeft: 8 }}>
-                        <button onClick={() => deleteScenario(sc.id)} style={{ background: "none", border: "none", color: "#334455", cursor: "pointer", fontSize: 12, padding: 0 }}>✕</button>
+                        <button onClick={() => deleteScenario(sc.id)} style={{ background: "none", border: "none", color: "#334455", cursor: "pointer", fontSize: 14, padding: 0 }}>✕</button>
                       </td>
                     </tr>
                   );
@@ -956,12 +955,12 @@ export default function App() {
       {/* 印刷専用サマリー（画面では非表示） */}
       <div className="print-only-wrap" style={{ display: "none" }}>
         <div className="print-only" style={{ display: "none", fontFamily: "sans-serif" }}>
-          <h2 className="print-title" style={{ fontSize: 18, marginBottom: 4 }}>老後資産シミュレーション結果</h2>
-          <div className="print-label" style={{ fontSize: 11, marginBottom: 16 }}>出力日: {new Date().toLocaleDateString('ja-JP')}</div>
+          <h2 className="print-title" style={{ fontSize: 21, marginBottom: 4 }}>老後資産シミュレーション結果</h2>
+          <div className="print-label" style={{ fontSize: 13, marginBottom: 16 }}>出力日: {new Date().toLocaleDateString('ja-JP')}</div>
 
           <div className="print-section">
-            <div className="print-label" style={{ fontSize: 10, marginBottom: 8, fontWeight: 700 }}>■ 基本設定</div>
-            <table style={{ width: "100%", fontSize: 11, borderCollapse: "collapse" }}>
+            <div className="print-label" style={{ fontSize: 12, marginBottom: 8, fontWeight: 700 }}>■ 基本設定</div>
+            <table style={{ width: "100%", fontSize: 13, borderCollapse: "collapse" }}>
               <tbody>
                 {[
                   ["現在の年齢", `${currentAge}歳`],
@@ -981,24 +980,24 @@ export default function App() {
           </div>
 
           <div className="print-section">
-            <div className="print-label" style={{ fontSize: 10, marginBottom: 8, fontWeight: 700 }}>■ 判定結果</div>
-            <div className={isSafe ? "print-safe" : "print-warn"} style={{ fontSize: 16, fontWeight: 700, marginBottom: 6 }}>
+            <div className="print-label" style={{ fontSize: 12, marginBottom: 8, fontWeight: 700 }}>■ 判定結果</div>
+            <div className={isSafe ? "print-safe" : "print-warn"} style={{ fontSize: 18, fontWeight: 700, marginBottom: 6 }}>
               {isSafe ? "✓ 生涯 安全圏" : `⚠ ${withSale.depletionAge}歳で資産枯渇リスク`}
             </div>
             {saleEnabled && (
-              <div className="print-label" style={{ fontSize: 11 }}>
+              <div className="print-label" style={{ fontSize: 13 }}>
                 会社売却: {saleSaleAge}歳 → 手取り {fmtFull(afterTax)}（税負担 {fmtFull(taxAmount)}）
               </div>
             )}
           </div>
 
           <div className="print-section">
-            <div className="print-label" style={{ fontSize: 10, marginBottom: 8, fontWeight: 700 }}>■ 年齢別残高</div>
-            <table style={{ width: "100%", fontSize: 11, borderCollapse: "collapse" }}>
+            <div className="print-label" style={{ fontSize: 12, marginBottom: 8, fontWeight: 700 }}>■ 年齢別残高</div>
+            <table style={{ width: "100%", fontSize: 13, borderCollapse: "collapse" }}>
               <thead>
                 <tr>
                   {[50,55,60,65,70,75,80,85,90,95].map(a => (
-                    <th key={a} className="print-label" style={{ textAlign: "right", padding: "3px 5px", borderBottom: "1px solid #ccc", fontSize: 10 }}>{a}歳</th>
+                    <th key={a} className="print-label" style={{ textAlign: "right", padding: "3px 5px", borderBottom: "1px solid #ccc", fontSize: 12 }}>{a}歳</th>
                   ))}
                 </tr>
               </thead>
@@ -1006,7 +1005,7 @@ export default function App() {
                 <tr>
                   {[50,55,60,65,70,75,80,85,90,95].map(a => {
                     const v = withSale.data.find(d => d.age === a)?.assets ?? 0;
-                    return <td key={a} className={v > 0 ? "print-value" : "print-warn"} style={{ textAlign: "right", padding: "4px 5px", fontSize: 10 }}>{fmtFull(Math.max(v,0))}</td>;
+                    return <td key={a} className={v > 0 ? "print-value" : "print-warn"} style={{ textAlign: "right", padding: "4px 5px", fontSize: 12 }}>{fmtFull(Math.max(v,0))}</td>;
                   })}
                 </tr>
               </tbody>
@@ -1015,8 +1014,8 @@ export default function App() {
 
           {savedScenarios.length > 0 && (
             <div className="print-section">
-              <div className="print-label" style={{ fontSize: 10, marginBottom: 8, fontWeight: 700 }}>■ 保存シナリオ比較</div>
-              <table style={{ width: "100%", fontSize: 10, borderCollapse: "collapse" }}>
+              <div className="print-label" style={{ fontSize: 12, marginBottom: 8, fontWeight: 700 }}>■ 保存シナリオ比較</div>
+              <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse" }}>
                 <thead>
                   <tr>
                     <th className="print-label" style={{ textAlign: "left", padding: "3px 8px 3px 0", borderBottom: "1px solid #ccc" }}>シナリオ</th>
@@ -1065,7 +1064,7 @@ export default function App() {
         const cashAssets = (totalAssets - safeInvested);
         return (
           <div style={{ background: "linear-gradient(160deg,#080e18,#0a1220)", border: "1px solid #2a3a50", borderRadius: 12, padding: "14px 15px", marginBottom: 12 }}>
-            <div style={{ fontSize: 10, letterSpacing: "0.13em", textTransform: "uppercase", color: "#667788", fontWeight: 700, marginBottom: 10 }}>
+            <div style={{ fontSize: 12, letterSpacing: "0.13em", textTransform: "uppercase", color: "#667788", fontWeight: 700, marginBottom: 10 }}>
               📋 この試算の前提
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(155px, 1fr))", gap: "8px 12px" }}>
@@ -1083,9 +1082,9 @@ export default function App() {
                 { label: "現金バッファ",  value: `${cashBufferMonths}か月分`, sub: "（手元の最低維持額）" },
               ].map(({ label, value, sub, color }) => (
                 <div key={label}>
-                  <div style={{ fontSize: 9, color: "#445566", marginBottom: 1 }}>{label}</div>
-                  <div style={{ fontSize: 12, color: color ?? "#c8d8e8", fontWeight: 600 }}>{value}</div>
-                  {sub && <div style={{ fontSize: 9, color: "#334455" }}>{sub}</div>}
+                  <div style={{ fontSize: 11, color: "#445566", marginBottom: 1 }}>{label}</div>
+                  <div style={{ fontSize: 14, color: color ?? "#c8d8e8", fontWeight: 600 }}>{value}</div>
+                  {sub && <div style={{ fontSize: 11, color: "#334455" }}>{sub}</div>}
                 </div>
               ))}
             </div>
@@ -1096,15 +1095,15 @@ export default function App() {
       {/* ステータスバナー */}
       <div style={{ ...P, marginBottom: 12, borderColor: isSafe ? "#1e5f3a" : "#5f1e2a", background: isSafe ? "linear-gradient(135deg,#0a1e14,#0d2018)" : "linear-gradient(135deg,#1e0a10,#200d14)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
         <div>
-          <div style={{ fontSize: 10, color: isSafe ? "#4adfb0" : "#ff7799", textTransform: "uppercase", letterSpacing: "0.12em" }}>{isSafe ? "✓ LIFETIME SAFE" : "⚠ DEPLETION RISK"}</div>
-          <div style={{ fontSize: 20, fontWeight: 700, color: isSafe ? "#4adfb0" : "#ff5577", marginTop: 2 }}>{isSafe ? "生涯 安全圏" : `${withSale.depletionAge}歳で資産枯渇`}</div>
+          <div style={{ fontSize: 12, color: isSafe ? "#4adfb0" : "#ff7799", textTransform: "uppercase", letterSpacing: "0.12em" }}>{isSafe ? "✓ LIFETIME SAFE" : "⚠ DEPLETION RISK"}</div>
+          <div style={{ fontSize: 23, fontWeight: 700, color: isSafe ? "#4adfb0" : "#ff5577", marginTop: 2 }}>{isSafe ? "生涯 安全圏" : `${withSale.depletionAge}歳で資産枯渇`}</div>
         </div>
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
           {[65, 75, 85, 95].map(a => {
             const v = chartData.find(d => d.age === a)?.assets;
             return <div key={a} style={{ textAlign: "right" }}>
-              <div style={{ fontSize: 10, color: "#556677" }}>{a}歳</div>
-              <div style={{ fontSize: 13, color: (v ?? 0) > 0 ? "#c8d8e8" : "#ff5577", fontWeight: 600 }}>{fmtFull(v ?? 0)}</div>
+              <div style={{ fontSize: 12, color: "#556677" }}>{a}歳</div>
+              <div style={{ fontSize: 15, color: (v ?? 0) > 0 ? "#c8d8e8" : "#ff5577", fontWeight: 600 }}>{fmtFull(v ?? 0)}</div>
             </div>;
           })}
         </div>
@@ -1118,24 +1117,24 @@ export default function App() {
         const hasDanger = cashWarnAge !== null || halfWarnAge !== null;
         return (
           <div style={{ background: "linear-gradient(160deg,#0d1018,#0a0e18)", border: `1px solid ${hasDanger ? "#ff884422" : "#1e3a5f"}`, borderRadius: 12, padding: "12px 15px", marginBottom: 12, display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
-            <div style={{ fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: hasDanger ? "#ff8844" : "#445566", fontWeight: 700, minWidth: 100 }}>
+            <div style={{ fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: hasDanger ? "#ff8844" : "#445566", fontWeight: 700, minWidth: 100 }}>
               {hasDanger ? "⚠ 警戒ライン" : "✓ 警戒ラインなし"}
             </div>
             {cashWarnAge !== null ? (
               <div>
-                <div style={{ fontSize: 9, color: "#664433" }}>手元資金が生活費2年分を下回る</div>
-                <div style={{ fontSize: 13, color: "#ff9966", fontWeight: 600 }}>{cashWarnAge}歳ごろ</div>
+                <div style={{ fontSize: 11, color: "#664433" }}>手元資金が生活費2年分を下回る</div>
+                <div style={{ fontSize: 15, color: "#ff9966", fontWeight: 600 }}>{cashWarnAge}歳ごろ</div>
               </div>
             ) : (
-              <div style={{ fontSize: 11, color: "#334455" }}>手元2年分：生涯維持</div>
+              <div style={{ fontSize: 13, color: "#334455" }}>手元2年分：生涯維持</div>
             )}
             {halfWarnAge !== null ? (
               <div>
-                <div style={{ fontSize: 9, color: "#664433" }}>総資産が初期の50%を下回る</div>
-                <div style={{ fontSize: 13, color: "#ff9966", fontWeight: 600 }}>{halfWarnAge}歳ごろ</div>
+                <div style={{ fontSize: 11, color: "#664433" }}>総資産が初期の50%を下回る</div>
+                <div style={{ fontSize: 15, color: "#ff9966", fontWeight: 600 }}>{halfWarnAge}歳ごろ</div>
               </div>
             ) : (
-              <div style={{ fontSize: 11, color: "#334455" }}>初期50%水準：生涯維持</div>
+              <div style={{ fontSize: 13, color: "#334455" }}>初期50%水準：生涯維持</div>
             )}
           </div>
         );
@@ -1143,10 +1142,10 @@ export default function App() {
 
       {/* ── 感度分析（追加1） */}
       <div style={{ background: "linear-gradient(160deg,#0a1018,#0d1420)", border: "1px solid #1e3a5f", borderRadius: 12, padding: "14px 15px", marginBottom: 12 }}>
-        <div style={{ fontSize: 10, letterSpacing: "0.13em", textTransform: "uppercase", color: "#4a9eff", fontWeight: 700, marginBottom: 4 }}>
+        <div style={{ fontSize: 12, letterSpacing: "0.13em", textTransform: "uppercase", color: "#4a9eff", fontWeight: 700, marginBottom: 4 }}>
           🔬 感度分析 — 90歳残高への影響
         </div>
-        <div style={{ fontSize: 10, color: "#334455", marginBottom: 12 }}>
+        <div style={{ fontSize: 12, color: "#334455", marginBottom: 12 }}>
           各前提を少し変えたとき、90歳時点の残高がどれだけ変わるかの目安です
         </div>
         {sensitivityData.map((item) => {
@@ -1157,8 +1156,8 @@ export default function App() {
           return (
             <div key={item.id} style={{ marginBottom: 9 }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-                <span style={{ fontSize: 11, color: "#889aaa" }}>{item.label}</span>
-                <span style={{ fontSize: 11, fontWeight: 600, color: isNeg ? "#ff8855" : "#4adfb0", fontVariantNumeric: "tabular-nums" }}>
+                <span style={{ fontSize: 13, color: "#889aaa" }}>{item.label}</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: isNeg ? "#ff8855" : "#4adfb0", fontVariantNumeric: "tabular-nums" }}>
                   {isNeg ? "" : "+"}{fmtFull(item.diff)}
                 </span>
               </div>
@@ -1173,20 +1172,20 @@ export default function App() {
       {/* ── 3シナリオサマリー */}
       {triMode && triPessimistic && triOptimistic && (
         <div style={{ background: "linear-gradient(160deg,#0d1a12,#0a1810)", border: "1px solid #2adf9033", borderRadius: 12, padding: "14px 15px", marginBottom: 12 }}>
-          <div style={{ fontSize: 10, letterSpacing: "0.13em", textTransform: "uppercase", color: "#2adf90", fontWeight: 700, marginBottom: 10 }}>
+          <div style={{ fontSize: 12, letterSpacing: "0.13em", textTransform: "uppercase", color: "#2adf90", fontWeight: 700, marginBottom: 10 }}>
             📊 悲観・標準・楽観 3シナリオ比較
           </div>
           <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
               <thead>
                 <tr>
-                  <th style={{ color: "#445566", fontSize: 10, textAlign: "left", paddingBottom: 6, borderBottom: "1px solid #1e3a5f", paddingRight: 12 }}>シナリオ</th>
-                  <th style={{ color: "#445566", fontSize: 10, textAlign: "left", paddingBottom: 6, borderBottom: "1px solid #1e3a5f", paddingRight: 12 }}>前提</th>
+                  <th style={{ color: "#445566", fontSize: 12, textAlign: "left", paddingBottom: 6, borderBottom: "1px solid #1e3a5f", paddingRight: 12 }}>シナリオ</th>
+                  <th style={{ color: "#445566", fontSize: 12, textAlign: "left", paddingBottom: 6, borderBottom: "1px solid #1e3a5f", paddingRight: 12 }}>前提</th>
                   {[75, 85, 90, 95].map(a => (
-                    <th key={a} style={{ color: "#445566", fontSize: 10, textAlign: "right", paddingBottom: 6, borderBottom: "1px solid #1e3a5f", paddingLeft: 8 }}>{a}歳</th>
+                    <th key={a} style={{ color: "#445566", fontSize: 12, textAlign: "right", paddingBottom: 6, borderBottom: "1px solid #1e3a5f", paddingLeft: 8 }}>{a}歳</th>
                   ))}
-                  <th style={{ color: "#445566", fontSize: 10, textAlign: "right", paddingBottom: 6, borderBottom: "1px solid #1e3a5f", paddingLeft: 8 }}>枯渇</th>
-                  {dwzEnabled && <th style={{ color: "#445566", fontSize: 10, textAlign: "right", paddingBottom: 6, borderBottom: "1px solid #1e3a5f", paddingLeft: 8 }}>DWZ</th>}
+                  <th style={{ color: "#445566", fontSize: 12, textAlign: "right", paddingBottom: 6, borderBottom: "1px solid #1e3a5f", paddingLeft: 8 }}>枯渇</th>
+                  {dwzEnabled && <th style={{ color: "#445566", fontSize: 12, textAlign: "right", paddingBottom: 6, borderBottom: "1px solid #1e3a5f", paddingLeft: 8 }}>DWZ</th>}
                 </tr>
               </thead>
               <tbody>
@@ -1200,7 +1199,7 @@ export default function App() {
                   return (
                     <tr key={label}>
                       <td style={{ color, fontWeight: 700, paddingTop: 8, paddingRight: 12 }}>{label}</td>
-                      <td style={{ color: "#445566", fontSize: 10, paddingTop: 8, paddingRight: 12 }}>{prefix}</td>
+                      <td style={{ color: "#445566", fontSize: 12, paddingTop: 8, paddingRight: 12 }}>{prefix}</td>
                       {[75, 85, 90, 95].map(a => {
                         const v = result.data.find(d => d.age === a)?.assets ?? 0;
                         return <td key={a} style={{ textAlign: "right", paddingTop: 8, paddingLeft: 8, color: v > 0 ? color : "#ff5577", fontVariantNumeric: "tabular-nums" }}>{fmtFull(Math.max(v, 0))}</td>;
@@ -1219,10 +1218,10 @@ export default function App() {
       {/* ── ストレステストサマリー */}
       {stressMode && stressResult && (
         <div style={{ background: "linear-gradient(160deg,#1a1400,#18120a)", border: "1px solid #ffcc4433", borderRadius: 12, padding: "14px 15px", marginBottom: 12 }}>
-          <div style={{ fontSize: 10, letterSpacing: "0.13em", textTransform: "uppercase", color: "#ffcc44", fontWeight: 700, marginBottom: 4 }}>
+          <div style={{ fontSize: 12, letterSpacing: "0.13em", textTransform: "uppercase", color: "#ffcc44", fontWeight: 700, marginBottom: 4 }}>
             ⚡ ストレステスト結果
           </div>
-          <div style={{ fontSize: 11, color: "#aa8833", marginBottom: 10 }}>
+          <div style={{ fontSize: 13, color: "#aa8833", marginBottom: 10 }}>
             適用中：{STRESS_PRESETS.find(p => p.id === stressPresetId)?.label}
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 8, marginBottom: 10 }}>
@@ -1232,25 +1231,25 @@ export default function App() {
               const diff = stress - normal;
               return (
                 <div key={a} style={{ background: "#100e00", border: "1px solid #33280a", borderRadius: 8, padding: "8px 10px" }}>
-                  <div style={{ fontSize: 10, color: "#666644", marginBottom: 3 }}>{a}歳時点</div>
-                  <div style={{ fontSize: 12, color: "#ffcc44", fontWeight: 600 }}>{fmtFull(Math.max(stress, 0))}</div>
-                  <div style={{ fontSize: 10, color: diff >= 0 ? "#88cc66" : "#ff8855", marginTop: 2 }}>
+                  <div style={{ fontSize: 12, color: "#666644", marginBottom: 3 }}>{a}歳時点</div>
+                  <div style={{ fontSize: 14, color: "#ffcc44", fontWeight: 600 }}>{fmtFull(Math.max(stress, 0))}</div>
+                  <div style={{ fontSize: 12, color: diff >= 0 ? "#88cc66" : "#ff8855", marginTop: 2 }}>
                     通常比 {diff >= 0 ? "+" : ""}{fmtFull(diff)}
                   </div>
                 </div>
               );
             })}
             <div style={{ background: "#100e00", border: "1px solid #33280a", borderRadius: 8, padding: "8px 10px" }}>
-              <div style={{ fontSize: 10, color: "#666644", marginBottom: 3 }}>枯渇リスク</div>
-              <div style={{ fontSize: 12, fontWeight: 600, color: stressResult.depletionAge ? "#ff5577" : "#4adfb0" }}>
+              <div style={{ fontSize: 12, color: "#666644", marginBottom: 3 }}>枯渇リスク</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: stressResult.depletionAge ? "#ff5577" : "#4adfb0" }}>
                 {stressResult.depletionAge ? `${stressResult.depletionAge}歳` : "安全圏"}
               </div>
-              <div style={{ fontSize: 10, color: "#556644", marginTop: 2 }}>
+              <div style={{ fontSize: 12, color: "#556644", marginTop: 2 }}>
                 通常：{withSale.depletionAge ? `${withSale.depletionAge}歳` : "安全圏"}
               </div>
             </div>
           </div>
-          <div style={{ fontSize: 10, color: "#555533", paddingTop: 8, borderTop: "1px solid #2a2010" }}>
+          <div style={{ fontSize: 12, color: "#555533", paddingTop: 8, borderTop: "1px solid #2a2010" }}>
             {STRESS_PRESETS.find(p => p.id === stressPresetId)?.desc}
           </div>
         </div>
@@ -1260,8 +1259,8 @@ export default function App() {
       {saleEnabled && (
         <div style={{ ...LP, marginBottom: 12, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
           <div>
-            <div style={{ fontSize: 10, color: "#f0a040", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 700 }}>🏷 会社売却</div>
-            <div style={{ fontSize: 17, color: "#f0c060", fontWeight: 700, marginTop: 2 }}>{saleSaleAge}歳 → 手取り {fmtFull(afterTax)}</div>
+            <div style={{ fontSize: 12, color: "#f0a040", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 700 }}>🏷 会社売却</div>
+            <div style={{ fontSize: 19, color: "#f0c060", fontWeight: 700, marginTop: 2 }}>{saleSaleAge}歳 → 手取り {fmtFull(afterTax)}</div>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 7 }}>
             <StatCard label="税負担" value={fmtFull(taxAmount)} color="#ff8899" />
@@ -1273,7 +1272,7 @@ export default function App() {
 
       {/* グラフ */}
       <div style={{ ...P, marginBottom: 12 }}>
-        <div style={{ fontSize: 10, letterSpacing: "0.13em", textTransform: "uppercase", color: "#4a9eff", marginBottom: 8, fontWeight: 700 }}>資産推移グラフ</div>
+        <div style={{ fontSize: 12, letterSpacing: "0.13em", textTransform: "uppercase", color: "#4a9eff", marginBottom: 8, fontWeight: 700 }}>資産推移グラフ</div>
         {/* 凡例 */}
         <div style={{ display: "flex", gap: 16, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
           {[
@@ -1290,7 +1289,7 @@ export default function App() {
           ].map(({ color, label, dash }) => (
             <div key={label} style={{ display: "flex", alignItems: "center", gap: 5 }}>
               <div style={{ width: 18, height: 2, borderTop: `2px ${dash ? "dashed" : "solid"}`, borderColor: color }} />
-              <span style={{ fontSize: 10, color: "#556677" }}>{label}</span>
+              <span style={{ fontSize: 12, color: "#556677" }}>{label}</span>
             </div>
           ))}
         </div>
@@ -1311,8 +1310,8 @@ export default function App() {
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#0f2030" />
-            <XAxis dataKey="age" tick={{ fill: "#445566", fontSize: 10 }} tickFormatter={v => `${v}歳`} interval={4} />
-            <YAxis tick={{ fill: "#445566", fontSize: 10 }} tickFormatter={fmt} width={54} />
+            <XAxis dataKey="age" tick={{ fill: "#445566", fontSize: 12 }} tickFormatter={v => `${v}歳`} interval={4} />
+            <YAxis tick={{ fill: "#445566", fontSize: 12 }} tickFormatter={fmt} width={54} />
             <Tooltip content={<CustomTooltip />} />
             <ReferenceLine y={0} stroke="#334455" />
             {incomePhases.filter(p => p.enabled).map((p, i) => (
@@ -1323,21 +1322,21 @@ export default function App() {
             ))}
             {enabledEvents.map(ev => (
               <ReferenceLine key={ev.id} x={ev.age} stroke="#ff6644" strokeDasharray="2 3" strokeOpacity={0.6}
-                label={{ value: "💸", fill: "#ff6644", fontSize: 10 }} />
+                label={{ value: "💸", fill: "#ff6644", fontSize: 12 }} />
             ))}
             <ReferenceLine x={pensionAge} stroke="#4adfb0" strokeDasharray="3 3" strokeOpacity={0.5}
-              label={{ value: "年金", fill: "#4adfb0", fontSize: 9 }} />
+              label={{ value: "年金", fill: "#4adfb0", fontSize: 11 }} />
             {saleEnabled && (
               <ReferenceLine x={saleSaleAge} stroke="#f0a040" strokeDasharray="4 3"
-                label={{ value: "売却", fill: "#f0a040", fontSize: 9 }} />
+                label={{ value: "売却", fill: "#f0a040", fontSize: 11 }} />
             )}
             {dwzEnabled && (
               <ReferenceLine x={dwzTargetAge} stroke="#a040f0" strokeDasharray="3 3"
-                label={{ value: `DWZ目標 ${fmtFull(dwzTargetAmount * 1e4)}`, fill: "#a040f0", fontSize: 9 }} />
+                label={{ value: `DWZ目標 ${fmtFull(dwzTargetAmount * 1e4)}`, fill: "#a040f0", fontSize: 11 }} />
             )}
             {withSale.depletionAge && (
               <ReferenceLine x={withSale.depletionAge} stroke="#ff5577" strokeDasharray="4 3"
-                label={{ value: `${withSale.depletionAge}歳`, fill: "#ff5577", fontSize: 10 }} />
+                label={{ value: `${withSale.depletionAge}歳`, fill: "#ff5577", fontSize: 12 }} />
             )}
             {/* 売却なし合計（背景点線） */}
             <Area type="monotone" dataKey="assetsNoSale" stroke="#556677" strokeWidth={1.5} fill="url(#gNoSale)" dot={false} strokeDasharray="4 3" />
@@ -1367,28 +1366,28 @@ export default function App() {
             <BucketBar totalAssets={totalAssets} investedAssets={safeInvested} onChange={setInvestedAssets} />
               <SliderInput label="継続収入 → 運用に回す割合" value={incomeInvestRatioPct ?? investRatioPct} min={0} max={100} step={1} unit="%" onChange={setIncomeInvestRatioPct} accent="#2adf90" />
               <SliderInput label="一時収入（売却/退職金/相続）→ 運用に回す割合" value={windfallInvestRatioPct ?? investRatioPct} min={0} max={100} step={1} unit="%" onChange={setWindfallInvestRatioPct} accent="#f0a040" />
-            <div style={{ background: "#0a1520", border: "1px solid #1e3a5f22", borderRadius: 7, padding: "8px 10px", fontSize: 11 }}>
+            <div style={{ background: "#0a1520", border: "1px solid #1e3a5f22", borderRadius: 7, padding: "8px 10px", fontSize: 13 }}>
               <InfoRow label="収入・売却金の按分" value={`運用 ${investRatioPct}% / 手元 ${100 - investRatioPct}%`} color="#4a9eff" />
               <InfoRow label="支出の優先順" value="手元 → 運用（自動補填）" color="#556677" />
             </div>
           </Sec>
           <Sec title="生活費（年齢帯別）・運用" color="#ff8899">
-            <div style={{ fontSize: 10, color: "#556677", marginBottom: 8 }}>年齢帯ごとに月間生活費を設定できます</div>
+            <div style={{ fontSize: 12, color: "#556677", marginBottom: 8 }}>年齢帯ごとに月間生活費を設定できます</div>
             <div style={{ display: "grid", gridTemplateColumns: "14px 1fr 46px 8px 46px 52px 20px", gap: 4, marginBottom: 5 }}>
-              <span /><span style={{ ...S, fontSize: 10 }}>期間名</span><span style={{ ...S, fontSize: 10 }}>開始</span><span />
-              <span style={{ ...S, fontSize: 10 }}>終了</span><span style={{ ...S, fontSize: 10 }}>万/月</span><span />
+              <span /><span style={{ ...S, fontSize: 12 }}>期間名</span><span style={{ ...S, fontSize: 12 }}>開始</span><span />
+              <span style={{ ...S, fontSize: 12 }}>終了</span><span style={{ ...S, fontSize: 12 }}>万/月</span><span />
             </div>
             {expensePhases.map((ph, idx) => (
               <div key={ph.id} style={{ display: "grid", gridTemplateColumns: "14px 1fr 46px 8px 46px 52px 20px", gap: 4, alignItems: "center", marginBottom: 6 }}>
                 <div style={{ width: 8, height: 8, borderRadius: "50%", background: ph.enabled ? "#ff8899" : "#334455", margin: "0 auto", cursor: "pointer" }}
                   onClick={() => setExpensePhases(ps => ps.map(p => p.id === ph.id ? { ...p, enabled: !p.enabled } : p))} />
                 <input value={ph.label} onChange={e => setExpensePhases(ps => ps.map(p => p.id === ph.id ? { ...p, label: e.target.value } : p))}
-                  style={{ background: "#060e18", border: "1px solid #1e3a5f", borderRadius: 5, color: "#c8d8e8", padding: "4px 6px", fontSize: 11, outline: "none", fontFamily: "inherit", width: "100%" }} />
+                  style={{ background: "#060e18", border: "1px solid #1e3a5f", borderRadius: 5, color: "#c8d8e8", padding: "4px 6px", fontSize: 13, outline: "none", fontFamily: "inherit", width: "100%" }} />
                 <NumCell value={ph.fromAge} min={30} max={99} onChange={v => setExpensePhases(ps => ps.map(p => p.id === ph.id ? { ...p, fromAge: v } : p))} />
-                <span style={{ color: "#334455", fontSize: 10, textAlign: "center" }}>→</span>
+                <span style={{ color: "#334455", fontSize: 12, textAlign: "center" }}>→</span>
                 <NumCell value={ph.toAge} min={ph.fromAge + 1} max={101} onChange={v => setExpensePhases(ps => ps.map(p => p.id === ph.id ? { ...p, toAge: v } : p))} />
                 <NumCell value={ph.monthly} min={0} max={999} onChange={v => setExpensePhases(ps => ps.map(p => p.id === ph.id ? { ...p, monthly: v } : p))} />
-                <button onClick={() => setExpensePhases(ps => ps.filter(p => p.id !== ph.id))} style={{ background: "none", border: "none", color: "#334455", cursor: "pointer", fontSize: 13, padding: 0, lineHeight: 1 }}>✕</button>
+                <button onClick={() => setExpensePhases(ps => ps.filter(p => p.id !== ph.id))} style={{ background: "none", border: "none", color: "#334455", cursor: "pointer", fontSize: 15, padding: 0, lineHeight: 1 }}>✕</button>
               </div>
             ))}
             <AddBtn onClick={() => { const last = expensePhases[expensePhases.length - 1]; setExpensePhases(ps => [...ps, { id: nextExpId, label: "期間", fromAge: last?.toAge ?? currentAge, toAge: (last?.toAge ?? currentAge) + 10, monthly: 30, enabled: true }]); setNextExpId(n => n + 1); }} color="#ff8899">＋ 期間を追加</AddBtn>
@@ -1406,55 +1405,55 @@ export default function App() {
           </Sec>
           {/* 逆算ソルバー */}
           <div style={{ background: "linear-gradient(160deg,#0a1a10,#081408)", border: "1px solid #2adf9033", borderRadius: 10, padding: "13px 14px", marginTop: 4 }}>
-            <div style={{ fontSize: 10, letterSpacing: "0.13em", textTransform: "uppercase", color: "#2adf90", fontWeight: 700, marginBottom: 8 }}>逆算 — 最大生活費</div>
-            <div style={{ fontSize: 10, color: "#445566", marginBottom: 10 }}>現在の設定で枯渇しない最大の生活費増加額を計算します</div>
+            <div style={{ fontSize: 12, letterSpacing: "0.13em", textTransform: "uppercase", color: "#2adf90", fontWeight: 700, marginBottom: 8 }}>逆算 — 最大生活費</div>
+            <div style={{ fontSize: 12, color: "#445566", marginBottom: 10 }}>現在の設定で枯渇しない最大の生活費増加額を計算します</div>
             <button onClick={runSolver}
-              style={{ width: "100%", background: "#0d2a18", border: "1px solid #2adf9066", borderRadius: 7, color: "#2adf90", fontSize: 12, padding: "8px 0", cursor: "pointer", fontFamily: "inherit", fontWeight: 700, marginBottom: 10 }}>
+              style={{ width: "100%", background: "#0d2a18", border: "1px solid #2adf9066", borderRadius: 7, color: "#2adf90", fontSize: 14, padding: "8px 0", cursor: "pointer", fontFamily: "inherit", fontWeight: 700, marginBottom: 10 }}>
               ▶ 逆算を実行
             </button>
             {solverResult && (
               <div>
                 {solverResult.delta === -1 ? (
                   <div style={{ background: "#1a0808", border: "1px solid #ff557744", borderRadius: 7, padding: "8px 10px" }}>
-                    <div style={{ color: "#ff5577", fontSize: 12, fontWeight: 700 }}>⚠ 現状でも枯渇リスクあり</div>
-                    <div style={{ color: "#667788", fontSize: 11, marginTop: 4 }}>枯渇年齢: {solverResult.depletionAge}歳</div>
+                    <div style={{ color: "#ff5577", fontSize: 14, fontWeight: 700 }}>⚠ 現状でも枯渇リスクあり</div>
+                    <div style={{ color: "#667788", fontSize: 13, marginTop: 4 }}>枯渇年齢: {solverResult.depletionAge}歳</div>
                   </div>
                 ) : (
                   <div>
                     <div style={{ background: "#001510", border: "1px solid #2adf9033", borderRadius: 7, padding: "8px 10px", marginBottom: 8 }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                        <span style={{ color: "#445566", fontSize: 11 }}>最大追加（安全）</span>
-                        <span style={{ color: "#2adf90", fontSize: 16, fontWeight: 700 }}>+{solverResult.delta}万/月</span>
+                        <span style={{ color: "#445566", fontSize: 13 }}>最大追加（安全）</span>
+                        <span style={{ color: "#2adf90", fontSize: 18, fontWeight: 700 }}>+{solverResult.delta}万/月</span>
                       </div>
                       {expensePhases.filter(p => p.enabled).map(p => (
-                        <div key={p.id} style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#556677", marginBottom: 2 }}>
+                        <div key={p.id} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#556677", marginBottom: 2 }}>
                           <span>{p.label}</span>
                           <span>{p.monthly} → <span style={{ color: "#88ddaa" }}>{p.monthly + solverResult.delta}万/月</span></span>
                         </div>
                       ))}
                       <button onClick={() => applyDelta(solverResult.delta)}
-                        style={{ width: "100%", marginTop: 8, background: "#0a2818", border: "1px solid #2adf9088", borderRadius: 6, color: "#2adf90", fontSize: 11, padding: "6px 0", cursor: "pointer", fontFamily: "inherit", fontWeight: 700 }}>
+                        style={{ width: "100%", marginTop: 8, background: "#0a2818", border: "1px solid #2adf9088", borderRadius: 6, color: "#2adf90", fontSize: 13, padding: "6px 0", cursor: "pointer", fontFamily: "inherit", fontWeight: 700 }}>
                         このΔを支出設定に適用
                       </button>
                     </div>
                     {dwzEnabled && solverResult.deltaDwz !== null && (
                       <div style={{ background: "#0e0615", border: "1px solid #a040f033", borderRadius: 7, padding: "8px 10px" }}>
                         {solverResult.deltaDwz === -1 ? (
-                          <div style={{ color: "#ff7799", fontSize: 11 }}>⚠ DWZ目標は現状でも未達</div>
+                          <div style={{ color: "#ff7799", fontSize: 13 }}>⚠ DWZ目標は現状でも未達</div>
                         ) : (
                           <>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                              <span style={{ color: "#445566", fontSize: 11 }}>最大追加（DWZ達成）</span>
-                              <span style={{ color: "#c080ff", fontSize: 16, fontWeight: 700 }}>+{solverResult.deltaDwz}万/月</span>
+                              <span style={{ color: "#445566", fontSize: 13 }}>最大追加（DWZ達成）</span>
+                              <span style={{ color: "#c080ff", fontSize: 18, fontWeight: 700 }}>+{solverResult.deltaDwz}万/月</span>
                             </div>
                             {expensePhases.filter(p => p.enabled).map(p => (
-                              <div key={p.id} style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#556677", marginBottom: 2 }}>
+                              <div key={p.id} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#556677", marginBottom: 2 }}>
                                 <span>{p.label}</span>
                                 <span>{p.monthly} → <span style={{ color: "#c080ff" }}>{p.monthly + solverResult.deltaDwz}万/月</span></span>
                               </div>
                             ))}
                             <button onClick={() => applyDelta(solverResult.deltaDwz)}
-                              style={{ width: "100%", marginTop: 8, background: "#100820", border: "1px solid #a040f088", borderRadius: 6, color: "#c080ff", fontSize: 11, padding: "6px 0", cursor: "pointer", fontFamily: "inherit", fontWeight: 700 }}>
+                              style={{ width: "100%", marginTop: 8, background: "#100820", border: "1px solid #a040f088", borderRadius: 6, color: "#c080ff", fontSize: 13, padding: "6px 0", cursor: "pointer", fontFamily: "inherit", fontWeight: 700 }}>
                               このΔを支出設定に適用（DWZ）
                             </button>
                           </>
@@ -1470,9 +1469,9 @@ export default function App() {
 
         {/* 収入フェーズ */}
         <div style={IP}>
-          <div style={{ fontSize: 10, letterSpacing: "0.13em", textTransform: "uppercase", color: "#2adf90", borderBottom: "1px solid #2adf9025", paddingBottom: 5, marginBottom: 11, fontWeight: 700 }}>収入フェーズ</div>
+          <div style={{ fontSize: 12, letterSpacing: "0.13em", textTransform: "uppercase", color: "#2adf90", borderBottom: "1px solid #2adf9025", paddingBottom: 5, marginBottom: 11, fontWeight: 700 }}>収入フェーズ</div>
           <SliderInput label={<Tip term="takeRate">デフォルト手取り率</Tip>} value={defaultTakeRate} min={50} max={100} step={1} unit="%" onChange={setDefaultTakeRate} accent="#2adf90" />
-          <div style={{ background: "#001510", border: "1px solid #2adf9018", borderRadius: 7, padding: "5px 9px", marginBottom: 8, fontSize: 10, color: "#445566" }}>
+          <div style={{ background: "#001510", border: "1px solid #2adf9018", borderRadius: 7, padding: "5px 9px", marginBottom: 8, fontSize: 12, color: "#445566" }}>
             各フェーズで個別設定がない場合にこの値が使われます
           </div>
           {incomePhases.map((ph, idx) => (
@@ -1495,14 +1494,14 @@ export default function App() {
         <div style={LOP}>
           <Sec title="ローン・固定費" color="#aa88ff">
             <div style={{ display: "grid", gridTemplateColumns: "auto 1fr 50px 46px 20px", gap: 4, marginBottom: 5 }}>
-              <span /><span style={{ ...S, fontSize: 10 }}>名称</span><span style={{ ...S, fontSize: 10 }}>万/月</span><span style={{ ...S, fontSize: 10 }}>終了歳</span><span />
+              <span /><span style={{ ...S, fontSize: 12 }}>名称</span><span style={{ ...S, fontSize: 12 }}>万/月</span><span style={{ ...S, fontSize: 12 }}>終了歳</span><span />
             </div>
             {loans.map(l => <LoanRow key={l.id} loan={l} onUpdate={u => setLoans(ls => ls.map(x => x.id === l.id ? u : x))} onDelete={() => setLoans(ls => ls.filter(x => x.id !== l.id))} />)}
             <AddBtn onClick={() => { setLoans(ls => [...ls, { id: nextLoanId, label: "ローン", monthly: 10, endAge: currentAge + 10, enabled: true }]); setNextLoanId(n => n + 1); }} color="#aa88ff">＋ ローンを追加</AddBtn>
           </Sec>
           <Sec title="突発支出・一時費用" color="#ff6644">
             <div style={{ display: "grid", gridTemplateColumns: "auto 1fr 50px 54px 20px", gap: 4, marginBottom: 5 }}>
-              <span /><span style={{ ...S, fontSize: 10 }}>名称</span><span style={{ ...S, fontSize: 10 }}>年齢</span><span style={{ ...S, fontSize: 10 }}>金額(万)</span><span />
+              <span /><span style={{ ...S, fontSize: 12 }}>名称</span><span style={{ ...S, fontSize: 12 }}>年齢</span><span style={{ ...S, fontSize: 12 }}>金額(万)</span><span />
             </div>
             {oneTimeEvents.map(ev => <EventRow key={ev.id} ev={ev} onUpdate={u => setOneTimeEvents(es => es.map(e => e.id === ev.id ? u : e))} onDelete={() => setOneTimeEvents(es => es.filter(e => e.id !== ev.id))} />)}
             <AddBtn onClick={() => { setOneTimeEvents(es => [...es, { id: nextEventId, label: "一時支出", age: currentAge + 5, amount: 300, enabled: true }]); setNextEventId(n => n + 1); }} color="#ff6644">＋ 一時支出を追加</AddBtn>
@@ -1514,18 +1513,18 @@ export default function App() {
             )}
           </Sec>
           <Sec title="突発収入・一時収入" color="#2adf90">
-            <div style={{ fontSize: 10, color: "#556677", marginBottom: 7 }}>退職金・相続・保険金など</div>
+            <div style={{ fontSize: 12, color: "#556677", marginBottom: 7 }}>退職金・相続・保険金など</div>
             <div style={{ display: "grid", gridTemplateColumns: "auto 1fr 50px 54px 20px", gap: 4, marginBottom: 5 }}>
-              <span /><span style={{ ...S, fontSize: 10 }}>名称</span><span style={{ ...S, fontSize: 10 }}>年齢</span><span style={{ ...S, fontSize: 10 }}>金額(万)</span><span />
+              <span /><span style={{ ...S, fontSize: 12 }}>名称</span><span style={{ ...S, fontSize: 12 }}>年齢</span><span style={{ ...S, fontSize: 12 }}>金額(万)</span><span />
             </div>
             {oneTimeIncomes.map(ev => (
               <div key={ev.id} style={{ display: "grid", gridTemplateColumns: "auto 1fr 50px 54px 20px", gap: 4, alignItems: "center", marginBottom: 6 }}>
                 <Toggle value={ev.enabled} onChange={v => setOneTimeIncomes(es => es.map(e => e.id === ev.id ? { ...e, enabled: v } : e))} color="#2adf90" />
                 <input value={ev.label} onChange={e => setOneTimeIncomes(es => es.map(x => x.id === ev.id ? { ...x, label: e.target.value } : x))}
-                  style={{ background: "#060e18", border: "1px solid #1e3a5f", borderRadius: 5, color: "#c8d8e8", padding: "4px 6px", fontSize: 11, outline: "none", fontFamily: "inherit", width: "100%" }} />
+                  style={{ background: "#060e18", border: "1px solid #1e3a5f", borderRadius: 5, color: "#c8d8e8", padding: "4px 6px", fontSize: 13, outline: "none", fontFamily: "inherit", width: "100%" }} />
                 <NumCell value={ev.age} min={1} max={100} onChange={v => setOneTimeIncomes(es => es.map(e => e.id === ev.id ? { ...e, age: v } : e))} />
                 <NumCell value={ev.amount} min={0} max={99999} onChange={v => setOneTimeIncomes(es => es.map(e => e.id === ev.id ? { ...e, amount: v } : e))} />
-                <button onClick={() => setOneTimeIncomes(es => es.filter(e => e.id !== ev.id))} style={{ background: "none", border: "none", color: "#334455", cursor: "pointer", fontSize: 13, padding: 0, lineHeight: 1 }}>✕</button>
+                <button onClick={() => setOneTimeIncomes(es => es.filter(e => e.id !== ev.id))} style={{ background: "none", border: "none", color: "#334455", cursor: "pointer", fontSize: 15, padding: 0, lineHeight: 1 }}>✕</button>
               </div>
             ))}
             <AddBtn onClick={() => { setOneTimeIncomes(es => [...es, { id: nextIncomeEventId, label: "一時収入", age: currentAge + 10, amount: 500, enabled: true }]); setNextIncomeEventId(n => n + 1); }} color="#2adf90">＋ 一時収入を追加</AddBtn>
@@ -1558,7 +1557,7 @@ export default function App() {
 
           <div style={saleEnabled ? LP : P}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-              <div style={{ fontSize: 10, letterSpacing: "0.13em", textTransform: "uppercase", color: "#f0a040", fontWeight: 700 }}>会社売却シナリオ</div>
+              <div style={{ fontSize: 12, letterSpacing: "0.13em", textTransform: "uppercase", color: "#f0a040", fontWeight: 700 }}>会社売却シナリオ</div>
               <Toggle value={saleEnabled} onChange={setSaleEnabled} color="#f0a040" />
             </div>
             {saleEnabled && (
@@ -1588,8 +1587,8 @@ export default function App() {
         <div style={{ ...P, borderColor: dwzEnabled ? "#a040f044" : "#1e3a5f", background: dwzEnabled ? "linear-gradient(160deg,#100818,#0e0615)" : undefined }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: dwzEnabled ? 14 : 0 }}>
             <div>
-              <div style={{ fontSize: 10, letterSpacing: "0.13em", textTransform: "uppercase", color: "#a040f0", fontWeight: 700 }}><Tip term="DWZ">Die with Zero モード</Tip></div>
-              {dwzEnabled && <div style={{ fontSize: 10, color: "#667788", marginTop: 2 }}>目標年齢での残高目標を設定</div>}
+              <div style={{ fontSize: 12, letterSpacing: "0.13em", textTransform: "uppercase", color: "#a040f0", fontWeight: 700 }}><Tip term="DWZ">Die with Zero モード</Tip></div>
+              {dwzEnabled && <div style={{ fontSize: 12, color: "#667788", marginTop: 2 }}>目標年齢での残高目標を設定</div>}
             </div>
             <Toggle value={dwzEnabled} onChange={setDwzEnabled} color="#a040f0" />
           </div>
@@ -1598,13 +1597,13 @@ export default function App() {
               <SliderInput label="目標年齢" value={dwzTargetAge} min={70} max={100} step={1} unit="歳" onChange={setDwzTargetAge} accent="#a040f0" />
               <SliderInput label="目標残高" value={dwzTargetAmount} min={0} max={10000} step={100} unit="" display={v => fmtFull(v * 1e4)} onChange={setDwzTargetAmount} accent="#a040f0" />
               <div style={{ background: "#0e0615", border: `1px solid ${dwzOnTrack ? "#a040f044" : "#ff557744"}`, borderRadius: 7, padding: "9px 11px", marginTop: 4 }}>
-                <div style={{ fontSize: 10, color: dwzOnTrack ? "#c080ff" : "#ff7799", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 5 }}>
+                <div style={{ fontSize: 12, color: dwzOnTrack ? "#c080ff" : "#ff7799", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 5 }}>
                   {dwzOnTrack ? "✓ 目標クリア" : "⚠ 目標オーバー（使い残し）"}
                 </div>
                 <InfoRow label={`${dwzTargetAge}歳時点の推定残高`} value={fmtFull(dwzActual)} color="#c080ff" />
                 <InfoRow label="目標との差分" value={(dwzDiff >= 0 ? "+" : "") + fmtFull(dwzDiff)} color={dwzOnTrack ? "#a040f0" : "#ff8899"} />
-                {!dwzOnTrack && <div style={{ fontSize: 10, color: "#ff7799", marginTop: 6 }}>→ 生活費を増やすか、目標残高を上げてください</div>}
-                {dwzOnTrack && dwzDiff > 0 && <div style={{ fontSize: 10, color: "#a040f0", marginTop: 6 }}>→ 年間 {fmtFull(dwzDiff / Math.max(dwzTargetAge - currentAge, 1))} 追加消費できます</div>}
+                {!dwzOnTrack && <div style={{ fontSize: 12, color: "#ff7799", marginTop: 6 }}>→ 生活費を増やすか、目標残高を上げてください</div>}
+                {dwzOnTrack && dwzDiff > 0 && <div style={{ fontSize: 12, color: "#a040f0", marginTop: 6 }}>→ 年間 {fmtFull(dwzDiff / Math.max(dwzTargetAge - currentAge, 1))} 追加消費できます</div>}
               </div>
             </>
           )}
@@ -1615,7 +1614,7 @@ export default function App() {
         {/* ── ストレステスト設定 */}
         {stressMode && (
           <div style={{ background: "linear-gradient(160deg,#1a1400,#18120a)", border: "1px solid #ffcc4455", borderRadius: 12, padding: "16px 15px" }}>
-            <div style={{ fontSize: 10, letterSpacing: "0.13em", textTransform: "uppercase", color: "#ffcc44", fontWeight: 700, marginBottom: 12 }}>⚡ ストレステスト設定</div>
+            <div style={{ fontSize: 12, letterSpacing: "0.13em", textTransform: "uppercase", color: "#ffcc44", fontWeight: 700, marginBottom: 12 }}>⚡ ストレステスト設定</div>
             {STRESS_PRESETS.map(preset => (
               <div key={preset.id}
                 onClick={() => setStressPresetId(preset.id)}
@@ -1623,8 +1622,8 @@ export default function App() {
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <div style={{ width: 10, height: 10, borderRadius: "50%", background: stressPresetId === preset.id ? "#ffcc44" : "#334433", flexShrink: 0 }} />
                   <div>
-                    <div style={{ fontSize: 12, color: stressPresetId === preset.id ? "#ffcc44" : "#778866", fontWeight: 600 }}>{preset.label}</div>
-                    <div style={{ fontSize: 10, color: "#555533", marginTop: 2 }}>{preset.desc}</div>
+                    <div style={{ fontSize: 14, color: stressPresetId === preset.id ? "#ffcc44" : "#778866", fontWeight: 600 }}>{preset.label}</div>
+                    <div style={{ fontSize: 12, color: "#555533", marginTop: 2 }}>{preset.desc}</div>
                   </div>
                 </div>
               </div>
@@ -1633,14 +1632,14 @@ export default function App() {
         )}
       {/* マイルストーンテーブル */}
       <div style={{ ...P, marginTop: 11 }}>
-        <div style={{ fontSize: 10, letterSpacing: "0.13em", textTransform: "uppercase", color: "#4a9eff", marginBottom: 11, fontWeight: 700 }}>マイルストーン別 残高</div>
+        <div style={{ fontSize: 12, letterSpacing: "0.13em", textTransform: "uppercase", color: "#4a9eff", marginBottom: 11, fontWeight: 700 }}>マイルストーン別 残高</div>
         <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11, minWidth: 640 }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 640 }}>
             <thead>
               <tr>
-                <th style={{ color: "#445566", fontSize: 10, textAlign: "left", paddingBottom: 6, borderBottom: "1px solid #1e3a5f", paddingRight: 10 }}>項目</th>
+                <th style={{ color: "#445566", fontSize: 12, textAlign: "left", paddingBottom: 6, borderBottom: "1px solid #1e3a5f", paddingRight: 10 }}>項目</th>
                 {[50, 55, 60, 65, 70, 75, 80, 85, 90, 95].map(a => (
-                  <th key={a} style={{ color: "#445566", fontSize: 10, textAlign: "right", paddingBottom: 6, borderBottom: "1px solid #1e3a5f", paddingLeft: 5 }}>{a}歳</th>
+                  <th key={a} style={{ color: "#445566", fontSize: 12, textAlign: "right", paddingBottom: 6, borderBottom: "1px solid #1e3a5f", paddingLeft: 5 }}>{a}歳</th>
                 ))}
               </tr>
             </thead>
@@ -1684,17 +1683,17 @@ export default function App() {
         const supportPerYear = extraMonthly > 0 ? Math.floor(extraMonthly * 12) : 0;
         return (
           <div style={{ background: "linear-gradient(160deg,#0d1a20,#0a1828)", border: "1px solid #4a9eff33", borderRadius: 12, padding: "16px 15px", marginTop: 12 }}>
-            <div style={{ fontSize: 10, letterSpacing: "0.13em", textTransform: "uppercase", color: "#4a9eff", fontWeight: 700, marginBottom: 4 }}>
+            <div style={{ fontSize: 12, letterSpacing: "0.13em", textTransform: "uppercase", color: "#4a9eff", fontWeight: 700, marginBottom: 4 }}>
               💬 この結果を生活に置き換えると
             </div>
-            <div style={{ fontSize: 10, color: "#334455", marginBottom: 14 }}>
+            <div style={{ fontSize: 12, color: "#334455", marginBottom: 14 }}>
               ※ 現在の設定に基づく目安です。税務・実際の支出状況によって変わります。
             </div>
             {(() => {
               // DWZモード時はhorizonAgeまでの生存が目標
               const depletionBeforeDwz = dwzEnabled && withSale.depletionAge !== null && withSale.depletionAge <= horizonAge;
               if (!effectivelySafe2 || depletionBeforeDwz) return (
-                <div style={{ color: "#ff7799", fontSize: 12, padding: "10px", background: "#200a10", borderRadius: 8 }}>
+                <div style={{ color: "#ff7799", fontSize: 14, padding: "10px", background: "#200a10", borderRadius: 8 }}>
                   {dwzEnabled
                     ? `${dwzTargetAge}歳までに資産が枯渇する見込みです。支出や収入の設定を見直してください。`
                     : "現在の設定では資産が枯渇する見込みです。まず支出や収入の設定を見直してください。"}
@@ -1703,49 +1702,49 @@ export default function App() {
               return (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: 10 }}>
                 <div style={{ background: "#080f18", border: "1px solid #1a2a3a", borderRadius: 9, padding: "12px 13px" }}>
-                  <div style={{ fontSize: 10, color: "#4a9eff", fontWeight: 700, marginBottom: 6 }}>💴 毎月の追加余力</div>
+                  <div style={{ fontSize: 12, color: "#4a9eff", fontWeight: 700, marginBottom: 6 }}>💴 毎月の追加余力</div>
                   {extraMonthly > 0 ? (
                     <>
-                      <div style={{ fontSize: 18, fontWeight: 700, color: "#e8f0fe" }}>+{extraMonthly}万円/月</div>
-                      <div style={{ fontSize: 10, color: "#445566", marginTop: 4 }}>{dwzEnabled ? `${dwzTargetAge}歳まで安全を保ちながら増やせる生活費の目安` : "生涯安全を保ちながら増やせる生活費の目安"}</div>
+                      <div style={{ fontSize: 21, fontWeight: 700, color: "#e8f0fe" }}>+{extraMonthly}万円/月</div>
+                      <div style={{ fontSize: 12, color: "#445566", marginTop: 4 }}>{dwzEnabled ? `${dwzTargetAge}歳まで安全を保ちながら増やせる生活費の目安` : "生涯安全を保ちながら増やせる生活費の目安"}</div>
                     </>
                   ) : (
-                    <div style={{ fontSize: 12, color: "#445566" }}>現在の生活費がほぼ上限です</div>
+                    <div style={{ fontSize: 14, color: "#445566" }}>現在の生活費がほぼ上限です</div>
                   )}
                 </div>
                 <div style={{ background: "#080f18", border: "1px solid #1a2a3a", borderRadius: 9, padding: "12px 13px" }}>
-                  <div style={{ fontSize: 10, color: "#4adfb0", fontWeight: 700, marginBottom: 6 }}>✈ 旅行の余力（目安）</div>
+                  <div style={{ fontSize: 12, color: "#4adfb0", fontWeight: 700, marginBottom: 6 }}>✈ 旅行の余力（目安）</div>
                   {travelPerYear >= 1 ? (
                     <>
-                      <div style={{ fontSize: 18, fontWeight: 700, color: "#e8f0fe" }}>年{travelPerYear}回まで</div>
-                      <div style={{ fontSize: 10, color: "#445566", marginTop: 4 }}>旅行1回 {TRAVEL_COST_MAN}万円として換算</div>
+                      <div style={{ fontSize: 21, fontWeight: 700, color: "#e8f0fe" }}>年{travelPerYear}回まで</div>
+                      <div style={{ fontSize: 12, color: "#445566", marginTop: 4 }}>旅行1回 {TRAVEL_COST_MAN}万円として換算</div>
                     </>
                   ) : (
-                    <div style={{ fontSize: 12, color: "#445566" }}>旅行1回分の余力がない状態です</div>
+                    <div style={{ fontSize: 14, color: "#445566" }}>旅行1回分の余力がない状態です</div>
                   )}
                 </div>
                 <div style={{ background: "#080f18", border: "1px solid #1a2a3a", borderRadius: 9, padding: "12px 13px" }}>
-                  <div style={{ fontSize: 10, color: "#aa88ff", fontWeight: 700, marginBottom: 6 }}>🚗 車の買い替え周期</div>
+                  <div style={{ fontSize: 12, color: "#aa88ff", fontWeight: 700, marginBottom: 6 }}>🚗 車の買い替え周期</div>
                   {carEveryYears >= 1 ? (
                     <>
-                      <div style={{ fontSize: 18, fontWeight: 700, color: "#e8f0fe" }}>{carEveryYears}年に1回</div>
-                      <div style={{ fontSize: 10, color: "#445566", marginTop: 4 }}>車買い替え {CAR_COST_MAN}万円として換算</div>
+                      <div style={{ fontSize: 21, fontWeight: 700, color: "#e8f0fe" }}>{carEveryYears}年に1回</div>
+                      <div style={{ fontSize: 12, color: "#445566", marginTop: 4 }}>車買い替え {CAR_COST_MAN}万円として換算</div>
                     </>
                   ) : (
-                    <div style={{ fontSize: 12, color: "#445566" }}>
+                    <div style={{ fontSize: 14, color: "#445566" }}>
                       {extraMonthly > 0 ? `約${Math.ceil(CAR_COST_MAN / (extraMonthly * 12))}年分の余力で1回分` : "余力が限られています"}
                     </div>
                   )}
                 </div>
                 <div style={{ background: "#080f18", border: "1px solid #1a2a3a", borderRadius: 9, padding: "12px 13px" }}>
-                  <div style={{ fontSize: 10, color: "#f0a040", fontWeight: 700, marginBottom: 6 }}>🎁 子・孫への援助</div>
+                  <div style={{ fontSize: 12, color: "#f0a040", fontWeight: 700, marginBottom: 6 }}>🎁 子・孫への援助</div>
                   {supportPerYear > 0 ? (
                     <>
-                      <div style={{ fontSize: 18, fontWeight: 700, color: "#e8f0fe" }}>年{supportPerYear}万円まで</div>
-                      <div style={{ fontSize: 10, color: "#445566", marginTop: 4 }}>追加余力を援助に充てた場合の目安</div>
+                      <div style={{ fontSize: 21, fontWeight: 700, color: "#e8f0fe" }}>年{supportPerYear}万円まで</div>
+                      <div style={{ fontSize: 12, color: "#445566", marginTop: 4 }}>追加余力を援助に充てた場合の目安</div>
                     </>
                   ) : (
-                    <div style={{ fontSize: 12, color: "#445566" }}>現在の設定では援助の余力は限られています</div>
+                    <div style={{ fontSize: 14, color: "#445566" }}>現在の設定では援助の余力は限られています</div>
                   )}
                 </div>
               </div>
@@ -1755,7 +1754,7 @@ export default function App() {
         );
       })()}
 
-      <div style={{ textAlign: "center", marginTop: 16, fontSize: 10, color: "#2a3a4a" }}>
+      <div style={{ textAlign: "center", marginTop: 16, fontSize: 12, color: "#2a3a4a" }}>
         ※ 試算ツール。税務・資産設計は専門家にご相談ください。　v11: 3シナリオ・ストレステスト・生活言語翻訳 追加
       </div>
     </div>
