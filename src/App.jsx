@@ -1400,6 +1400,7 @@ export default function App() {
                 <button onClick={() => setExpensePhases(ps => ps.filter(p => p.id !== ph.id))} style={{ background: "none", border: "none", color: "#334455", cursor: "pointer", fontSize: 15, padding: 0, lineHeight: 1 }}>✕</button>
               </div>
             ))}
+            </div>{/* /mobile-scroll */}
             <AddBtn onClick={() => { const last = expensePhases[expensePhases.length - 1]; setExpensePhases(ps => [...ps, { id: nextExpId, label: "期間", fromAge: last?.toAge ?? currentAge, toAge: (last?.toAge ?? currentAge) + 10, monthly: 30, enabled: true }]); setNextExpId(n => n + 1); }} color="#ff8899">＋ 期間を追加</AddBtn>
             <div style={{ marginTop: 10, background: "#0a1520", border: "1px solid #1e3a5f22", borderRadius: 7, padding: "7px 9px" }}>
               <SliderInput label="インフレ率" value={inflationRate} min={0} max={5} step={0.1} unit="%" onChange={setInflationRate} />
