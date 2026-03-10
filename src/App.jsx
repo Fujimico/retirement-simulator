@@ -292,9 +292,6 @@ const CustomTooltip = ({ active, payload, label }) => {
         {(d?.oneTimeIncome ?? 0) > 0 && <InfoRow label="一時収入" value={`+${fmtFull(d.oneTimeIncome)}`} color="#2adf90" />}
       </div>
     </div>
-    </div>
-    </div>
-  </div>
   );
 };
 
