@@ -1668,15 +1668,17 @@ export default function App() {
 
       {/* ── 生活言語への翻訳 */}
       {(() => {
+        // DWZモードON時はdwzTargetAge、OFF時は90歳を計算基準年齢とする
+        const horizonAge = dwzEnabled ? dwzTargetAge : 100;
+        const effectivelySafe2 = isSafe || (dwzEnabled && (withSale.data.find(d => d.age === horizonAge)?.assets ?? 0) >= 0);
         // 逆算ソルバーが実行済みなら solverResult.delta を、未実行なら簡易推算
-        // 「現在の標準シナリオで90歳まで余力がある場合の追加可能額」を概算
         const extraMonthly = solverResult && solverResult.delta >= 0 ? solverResult.delta : (() => {
-          const at90 = withSale.data.find(d => d.age === 90)?.assets ?? 0;
-          if (at90 <= 0 || !isSafe) return 0;
-          const remainYears = Math.max(90 - currentAge, 1);
-          return Math.floor(at90 / (remainYears * 12 * 1e4));
+          const atHorizon = withSale.data.find(d => d.age === horizonAge)?.assets ?? 0;
+          if (atHorizon <= 0 || !effectivelySafe2) return 0;
+          const remainYears = Math.max(horizonAge - currentAge, 1);
+          return Math.floor(atHorizon / (remainYears * 12 * 1e4));
         })();
-        if (extraMonthly <= 0 && isSafe) return null;
+        if (extraMonthly <= 0 && effectivelySafe2) return null;
         const travelPerYear = extraMonthly > 0 ? Math.floor(extraMonthly * 12 / TRAVEL_COST_MAN) : 0;
         const carEveryYears = extraMonthly > 0 ? Math.floor(CAR_COST_MAN / (extraMonthly * 12)) : 0;
         const supportPerYear = extraMonthly > 0 ? Math.floor(extraMonthly * 12) : 0;
@@ -1689,10 +1691,9 @@ export default function App() {
               ※ 現在の設定に基づく目安です。税務・実際の支出状況によって変わります。
             </div>
             {(() => {
-              // DWZモード時はdwzTargetAgeまでの生存が目標、それ以降は考慮外
-              const effectivelySafe = isSafe || (dwzEnabled && (withSale.data.find(d => d.age === dwzTargetAge)?.assets ?? 0) >= 0);
-              const depletionBeforeDwz = dwzEnabled && withSale.depletionAge !== null && withSale.depletionAge <= dwzTargetAge;
-              if (!effectivelySafe || depletionBeforeDwz) return (
+              // DWZモード時はhorizonAgeまでの生存が目標
+              const depletionBeforeDwz = dwzEnabled && withSale.depletionAge !== null && withSale.depletionAge <= horizonAge;
+              if (!effectivelySafe2 || depletionBeforeDwz) return (
                 <div style={{ color: "#ff7799", fontSize: 12, padding: "10px", background: "#200a10", borderRadius: 8 }}>
                   {dwzEnabled
                     ? `${dwzTargetAge}歳までに資産が枯渇する見込みです。支出や収入の設定を見直してください。`
@@ -1706,7 +1707,7 @@ export default function App() {
                   {extraMonthly > 0 ? (
                     <>
                       <div style={{ fontSize: 18, fontWeight: 700, color: "#e8f0fe" }}>+{extraMonthly}万円/月</div>
-                      <div style={{ fontSize: 10, color: "#445566", marginTop: 4 }}>生涯安全を保ちながら増やせる生活費の目安</div>
+                      <div style={{ fontSize: 10, color: "#445566", marginTop: 4 }}>{dwzEnabled ? `${dwzTargetAge}歳まで安全を保ちながら増やせる生活費の目安` : "生涯安全を保ちながら増やせる生活費の目安"}</div>
                     </>
                   ) : (
                     <div style={{ fontSize: 12, color: "#445566" }}>現在の生活費がほぼ上限です</div>
