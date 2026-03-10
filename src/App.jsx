@@ -470,6 +470,16 @@ const BucketBar = ({ totalAssets, investedAssets, onChange }) => {
 };
 
 // ── 印刷用スタイル注入
+const MOBILE_STYLE = `
+@media (max-width: 600px) {
+  .mobile-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .mobile-col1 { grid-template-columns: 1fr !important; }
+  .mobile-col2 { grid-template-columns: 1fr 1fr !important; }
+  .outer-pad { padding: 12px 8px !important; }
+  .header-btns { flex-wrap: wrap !important; gap: 6px !important; }
+  .chart-height { height: 220px !important; }
+}
+`;
 const PRINT_STYLE = `
 @media print {
   body { background: #fff !important; color: #111 !important; }
@@ -758,7 +768,7 @@ export default function App() {
   // 印刷スタイル注入
   useEffect(() => {
     const style = document.createElement('style');
-    style.innerHTML = PRINT_STYLE;
+    style.innerHTML = PRINT_STYLE + MOBILE_STYLE;
     document.head.appendChild(style);
     return () => document.head.removeChild(style);
   }, []);
@@ -827,14 +837,14 @@ export default function App() {
   const LOP = { ...P, borderColor: "#aa88ff33", background: "linear-gradient(160deg,#0d0820,#0a0618)" };
 
   return (
-    <div className="print-page" style={{ minHeight: "100vh", background: "#060e18", color: "#c8d8e8", fontFamily: "'DM Mono','Fira Code','Courier New',monospace", padding: "20px 16px" }}>
+    <div className="print-page outer-pad" style={{ minHeight: "100vh", background: "#060e18", color: "#c8d8e8", fontFamily: "'DM Mono','Fira Code','Courier New',monospace", padding: "20px 16px" }}>
 
       <div style={{ marginBottom: 18 }}>
         <div style={{ textAlign: "center" }}>
           <h1 style={{ margin: 0, fontSize: 23, fontWeight: 700, color: "#e8f0fe" }}>老後資産シミュレーター</h1>
           <div style={{ fontSize: 13, color: "#334455", marginTop: 3 }}>2バケツ方式（運用資産 / 手元資産）対応</div>
         </div>
-        <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 12 }}>
+        <div className="header-btns" style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
           <button onClick={() => setShowSaveModal(true)}
             style={{ background: "#0a1e14", border: "1px solid #2adf9066", borderRadius: 8, color: "#2adf90", fontSize: 13, padding: "7px 16px", cursor: "pointer", fontFamily: "inherit", fontWeight: 700 }}>
             💾 シナリオを保存
@@ -1262,7 +1272,7 @@ export default function App() {
             <div style={{ fontSize: 12, color: "#f0a040", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 700 }}>🏷 会社売却</div>
             <div style={{ fontSize: 19, color: "#f0c060", fontWeight: 700, marginTop: 2 }}>{saleSaleAge}歳 → 手取り {fmtFull(afterTax)}</div>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 7 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(90px, 1fr))", gap: 7 }}>
             <StatCard label="税負担" value={fmtFull(taxAmount)} color="#ff8899" />
             <StatCard label="80歳差分" value={(impactAt80 >= 0 ? "+" : "") + fmtFull(impactAt80)} color={impactAt80 >= 0 ? "#4adfb0" : "#ff5577"} sub="あり vs なし" />
             <StatCard label="売却なし" value={isNoSaleSafe ? "生涯安全" : `${noSale.depletionAge}歳`} color={isNoSaleSafe ? "#4adfb0" : "#ff5577"} />
@@ -1293,7 +1303,7 @@ export default function App() {
             </div>
           ))}
         </div>
-        <ResponsiveContainer width="100%" height={270}>
+        <div className="chart-height" style={{ height: 270 }}><ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartData} margin={{ top: 8, right: 8, left: 6, bottom: 0 }}>
             <defs>
               <linearGradient id="gInv" x1="0" y1="0" x2="0" y2="1">
@@ -1354,7 +1364,7 @@ export default function App() {
       </div>
 
       {/* コントロール */}
-      <div className="no-print" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(270px, 1fr))", gap: 11 }}>
+      <div className="no-print" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(270px, 100%), 1fr))", gap: 11 }}>
 
         {/* 資産 & 2バケツ */}
         <div style={P}>
@@ -1373,12 +1383,12 @@ export default function App() {
           </Sec>
           <Sec title="生活費（年齢帯別）・運用" color="#ff8899">
             <div style={{ fontSize: 12, color: "#556677", marginBottom: 8 }}>年齢帯ごとに月間生活費を設定できます</div>
-            <div style={{ display: "grid", gridTemplateColumns: "14px 1fr 46px 8px 46px 52px 20px", gap: 4, marginBottom: 5 }}>
+            <div className="mobile-scroll"><div style={{ display: "grid", gridTemplateColumns: "14px 1fr 46px 8px 46px 52px 20px", gap: 4, marginBottom: 5, minWidth: 300 }}>
               <span /><span style={{ ...S, fontSize: 12 }}>期間名</span><span style={{ ...S, fontSize: 12 }}>開始</span><span />
               <span style={{ ...S, fontSize: 12 }}>終了</span><span style={{ ...S, fontSize: 12 }}>万/月</span><span />
             </div>
             {expensePhases.map((ph, idx) => (
-              <div key={ph.id} style={{ display: "grid", gridTemplateColumns: "14px 1fr 46px 8px 46px 52px 20px", gap: 4, alignItems: "center", marginBottom: 6 }}>
+              <div key={ph.id} style={{ display: "grid", gridTemplateColumns: "14px 1fr 46px 8px 46px 52px 20px", gap: 4, alignItems: "center", marginBottom: 6, minWidth: 300 }}>
                 <div style={{ width: 8, height: 8, borderRadius: "50%", background: ph.enabled ? "#ff8899" : "#334455", margin: "0 auto", cursor: "pointer" }}
                   onClick={() => setExpensePhases(ps => ps.map(p => p.id === ph.id ? { ...p, enabled: !p.enabled } : p))} />
                 <input value={ph.label} onChange={e => setExpensePhases(ps => ps.map(p => p.id === ph.id ? { ...p, label: e.target.value } : p))}
