@@ -313,7 +313,6 @@ const CardNumInput = ({ value, onChange, min = 0, max = 999, suffix = "" }) => {
         style={{ width: "100%", background: "#0a1520", border: "1px solid #1e3a5f", borderRadius: 6, color: "#e8f0fe", padding: "6px 8px", fontSize: 15, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} />
       {suffix && <span style={{ fontSize: 13, color: "#445566" }}>{suffix}</span>}
     </div>
-  </div>
   );
 };
 
