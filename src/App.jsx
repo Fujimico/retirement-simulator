@@ -65,7 +65,15 @@ function simulate({
 
   for (let age = currentAge; age <= MAX; age++) {
     const yearsFromNow = age - currentAge;
-    const inflFactor = Math.pow(1 + inflationRate / 100, yearsFromNow);
+    // 修正1: 高インフレ期間は年ごとに正確に累積計算する
+    // stressExtraInflYears 年間だけ (inflationRate + stressExtraInflPt) を使い、その後は通常に戻す
+    let inflFactor = 1;
+    for (let y = 0; y < yearsFromNow; y++) {
+      const r = (stressExtraInflYears != null && stressExtraInflPt != null && y < stressExtraInflYears)
+        ? (inflationRate + stressExtraInflPt) / 100
+        : inflationRate / 100;
+      inflFactor *= (1 + r);
+    }
 
     // 支出（年齢帯別）
     const activePhase = expensePhases.filter(p => p.enabled && age >= p.fromAge && age < p.toAge);
@@ -229,6 +237,28 @@ const InfoRow = ({ label, value, color = "#8899aa" }) => (
     <span style={{ color, fontSize: 11, fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>{value}</span>
   </div>
 );
+
+// ── 用語補足ツールチップ（修正3）
+const TERM_TIPS = {
+  DWZ: "「使い切る目標残高」の設定。老後に残したい最低ラインを決め、\nそれを下回らない範囲で使える額を計算します。",
+  bucket2: "資産を「運用バケツ（株・投信など）」と「手元バケツ（現金）」の\n2つに分けて管理する方式。取り崩しリスクを減らせます。",
+  takeRate: "税・社会保険料を引いた後の手取り割合。\n例：月収100万円で手取り率80%なら、手元に入るのは80万円。",
+  macroSlide: "年金額の改定ルール。物価や賃金の上昇より少し低く抑えられる仕組み。\nここでは年間の調整率（マイナスも設定可）として反映します。",
+  stress: "想定外の出来事（資産急落・インフレ・売却遅延など）が起きたときに\n資産がどう変わるかを確認する機能です。",
+};
+const Tip = ({ term, children }) => {
+  const [show, setShow] = useState(false);
+  const tip = TERM_TIPS[term];
+  if (!tip) return <>{children}</>;
+  return (
+    <span style={{ position: "relative", display: "inline-flex", alignItems: "center", gap: 3 }}>
+      {children}
+      <span onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)} onClick={() => setShow(s => !s)}
+        style={{ display:"inline-flex",alignItems:"center",justifyContent:"center",width:14,height:14,borderRadius:"50%",background:"#1a2a3a",border:"1px solid #2a4a6a",color:"#4a9eff",fontSize:9,cursor:"pointer",userSelect:"none",flexShrink:0 }}>?</span>
+      {show && <span style={{ position:"absolute",bottom:"120%",left:0,zIndex:50,background:"#0d1e30",border:"1px solid #2a4a6a",borderRadius:8,padding:"8px 10px",fontSize:10,color:"#aabbcc",whiteSpace:"pre-line",width:220,lineHeight:1.6,boxShadow:"0 4px 16px #000a" }}>{tip}</span>}
+    </span>
+  );
+};
 
 const StatCard = ({ label, value, color = "#c8d8e8", sub }) => (
   <div style={{ background: "#0a1520", border: "1px solid #1e3a5f", borderRadius: 7, padding: "8px 11px" }}>
@@ -575,10 +605,8 @@ export default function App() {
       case "asset_shock":
         return simulate({ ...base, stressAssetShockAge: currentAge });
       case "high_inflation":
-        // 高インフレ：10年間 inflFactor に+2ptを加える → inflationRate自体を上げて近似
-        // 正確には10年後に戻すべきだが、ここでは「最初の10年+2pt平均」として近似
-        return simulate({ ...base, stressExtraInflYears: 10, stressExtraInflPt: 2,
-          inflationRate: inflationRate + 2 }); // 期間限定の近似
+        // 修正1: 年ごとの累積で正確に計算。10年後は通常インフレに戻る
+        return simulate({ ...base, stressExtraInflYears: 10, stressExtraInflPt: 2 });
       case "sale_delay":
         return simulate({ ...base, saleSaleAge: saleEnabled ? saleSaleAge + 3 : saleSaleAge });
       case "medical":
@@ -598,6 +626,62 @@ export default function App() {
     // ストレス
     assetsStress: stressResult?.data[i]?.assets ?? undefined,
   })), [withSale, noSale, triPessimistic, triOptimistic, stressResult, dwzEnabled, dwzTargetAge, dwzTargetAmount]);
+
+
+  // ── 感度分析（追加1）: 各前提を変えたときの90歳残高差
+  const SENSITIVITY_ITEMS = [
+    { id: "expense+5",   label: "生活費 +5万/月",        always: true  },
+    { id: "return-1",    label: "運用利回り −1pt",       always: true  },
+    { id: "infl+1",      label: "インフレ率 +1pt",       always: true  },
+    { id: "sale-3000",   label: "売却額 −3,000万円",     always: false },
+    { id: "sale-3yr",    label: "売却 3年遅れ",           always: false },
+  ];
+  const sensitivityData = useMemo(() => {
+    const base = { ...simParams, saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType, salePostSalary, salePostSalaryYears };
+    const baseAt90 = withSale.data.find(d => d.age === 90)?.assets ?? 0;
+    return SENSITIVITY_ITEMS
+      .filter(item => item.always || saleEnabled)
+      .map(item => {
+        let res;
+        switch (item.id) {
+          case "expense+5":
+            res = simulate({ ...base, expensePhases: expensePhases.map(p => p.enabled ? { ...p, monthly: p.monthly + 5 } : p) });
+            break;
+          case "return-1":
+            res = simulate({ ...base, returnRate: returnRate - 1 });
+            break;
+          case "infl+1":
+            res = simulate({ ...base, inflationRate: inflationRate + 1 });
+            break;
+          case "sale-3000":
+            res = simulate({ ...base, saleGross: Math.max(saleGross - 3000, 0) });
+            break;
+          case "sale-3yr":
+            res = simulate({ ...base, saleSaleAge: saleSaleAge + 3 });
+            break;
+          default: res = withSale;
+        }
+        const at90 = res.data.find(d => d.age === 90)?.assets ?? 0;
+        return { ...item, at90, diff: at90 - baseAt90 };
+      })
+      .sort((a, b) => a.diff - b.diff); // 影響大きい順（マイナスが大きい順）
+  }, [JSON.stringify(simParams), saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType,
+      salePostSalary, salePostSalaryYears, returnRate, inflationRate, expensePhases, withSale]);
+
+  // ── 危険水域入り年齢（追加2）
+  const dangerZone = useMemo(() => {
+    const initTotal = totalAssets * 1e4;
+    const firstPhaseMonthly = expensePhases.filter(p => p.enabled)[0]?.monthly ?? 30;
+    const cashThreshold = firstPhaseMonthly * 24 * 1e4; // 生活費24か月分
+    const halfAssets = initTotal * 0.5;
+    let cashWarnAge = null;
+    let halfWarnAge = null;
+    for (const d of withSale.data) {
+      if (cashWarnAge === null && d.cash < cashThreshold && d.cash >= 0) cashWarnAge = d.age;
+      if (halfWarnAge === null && d.assets < halfAssets && d.assets >= 0) halfWarnAge = d.age;
+    }
+    return { cashWarnAge, halfWarnAge, cashThreshold, halfAssets };
+  }, [withSale, totalAssets, expensePhases]);
 
   const dwzActual = dwzEnabled ? (withSale.data.find(d => d.age === dwzTargetAge)?.assets ?? 0) : 0;
   const dwzDiff = dwzActual - dwzTargetAmount * 1e4;
@@ -747,7 +831,7 @@ export default function App() {
 
       <div style={{ marginBottom: 18 }}>
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 10, letterSpacing: "0.3em", color: "#4a9eff", textTransform: "uppercase", marginBottom: 3 }}>Private Asset Planner v11</div>
+          <div style={{ fontSize: 10, letterSpacing: "0.3em", color: "#4a9eff", textTransform: "uppercase", marginBottom: 3 }}>Private Asset Planner v12</div>
           <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "#e8f0fe" }}>老後資産シミュレーター</h1>
           <div style={{ fontSize: 11, color: "#334455", marginTop: 3 }}>2バケツ方式（運用資産 / 手元資産）対応</div>
         </div>
@@ -974,6 +1058,41 @@ export default function App() {
         </div>
       </div>
 
+
+      {/* ── 前提サマリーカード（修正2） */}
+      {(() => {
+        const firstPhase = expensePhases.filter(p => p.enabled)[0];
+        const cashAssets = (totalAssets - safeInvested);
+        return (
+          <div style={{ background: "linear-gradient(160deg,#080e18,#0a1220)", border: "1px solid #2a3a50", borderRadius: 12, padding: "14px 15px", marginBottom: 12 }}>
+            <div style={{ fontSize: 10, letterSpacing: "0.13em", textTransform: "uppercase", color: "#667788", fontWeight: 700, marginBottom: 10 }}>
+              📋 この試算の前提
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(155px, 1fr))", gap: "8px 12px" }}>
+              {[
+                { label: "現在の年齢",    value: `${currentAge}歳` },
+                { label: "総資産",        value: fmtFull(totalAssets * 1e4) },
+                { label: "うち運用資産",  value: fmtFull(safeInvested * 1e4), sub: `（全体の${Math.round(safeInvested/totalAssets*100)}%）` },
+                { label: "うち現金資産",  value: fmtFull(cashAssets * 1e4) },
+                { label: "月間生活費",    value: `${firstPhase?.monthly ?? "—"}万円/月`, sub: firstPhase ? `（${firstPhase.label}）` : "" },
+                { label: "公的年金",      value: `${pensionAge}歳〜 ${pensionAmount}万/月` },
+                ...(privatePensionAmount > 0 ? [{ label: "私的年金", value: `${privatePensionAge}歳〜 ${privatePensionAmount}万/月`, sub: `（${privatePensionYears}年間）` }] : []),
+                ...(saleEnabled ? [{ label: "会社売却", value: `${saleSaleAge}歳 手取り${fmtFull(calcAfterTax(saleGross*1e4,saleBookValue*1e4,saleTaxType))}`, sub: "(税引後)", color: "#f0c060" }] : []),
+                { label: "運用利回り",    value: `年 ${returnRate}%` },
+                { label: "インフレ率",    value: `年 ${inflationRate}%` },
+                { label: "現金バッファ",  value: `${cashBufferMonths}か月分`, sub: "（手元の最低維持額）" },
+              ].map(({ label, value, sub, color }) => (
+                <div key={label}>
+                  <div style={{ fontSize: 9, color: "#445566", marginBottom: 1 }}>{label}</div>
+                  <div style={{ fontSize: 12, color: color ?? "#c8d8e8", fontWeight: 600 }}>{value}</div>
+                  {sub && <div style={{ fontSize: 9, color: "#334455" }}>{sub}</div>}
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* ステータスバナー */}
       <div style={{ ...P, marginBottom: 12, borderColor: isSafe ? "#1e5f3a" : "#5f1e2a", background: isSafe ? "linear-gradient(135deg,#0a1e14,#0d2018)" : "linear-gradient(135deg,#1e0a10,#200d14)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
         <div>
@@ -991,6 +1110,65 @@ export default function App() {
         </div>
       </div>
 
+
+
+      {/* ── 危険水域入り年齢（追加2） */}
+      {(() => {
+        const { cashWarnAge, halfWarnAge } = dangerZone;
+        const hasDanger = cashWarnAge !== null || halfWarnAge !== null;
+        return (
+          <div style={{ background: "linear-gradient(160deg,#0d1018,#0a0e18)", border: `1px solid ${hasDanger ? "#ff884422" : "#1e3a5f"}`, borderRadius: 12, padding: "12px 15px", marginBottom: 12, display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
+            <div style={{ fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: hasDanger ? "#ff8844" : "#445566", fontWeight: 700, minWidth: 100 }}>
+              {hasDanger ? "⚠ 警戒ライン" : "✓ 警戒ラインなし"}
+            </div>
+            {cashWarnAge !== null ? (
+              <div>
+                <div style={{ fontSize: 9, color: "#664433" }}>手元資金が生活費2年分を下回る</div>
+                <div style={{ fontSize: 13, color: "#ff9966", fontWeight: 600 }}>{cashWarnAge}歳ごろ</div>
+              </div>
+            ) : (
+              <div style={{ fontSize: 11, color: "#334455" }}>手元2年分：生涯維持</div>
+            )}
+            {halfWarnAge !== null ? (
+              <div>
+                <div style={{ fontSize: 9, color: "#664433" }}>総資産が初期の50%を下回る</div>
+                <div style={{ fontSize: 13, color: "#ff9966", fontWeight: 600 }}>{halfWarnAge}歳ごろ</div>
+              </div>
+            ) : (
+              <div style={{ fontSize: 11, color: "#334455" }}>初期50%水準：生涯維持</div>
+            )}
+          </div>
+        );
+      })()}
+
+      {/* ── 感度分析（追加1） */}
+      <div style={{ background: "linear-gradient(160deg,#0a1018,#0d1420)", border: "1px solid #1e3a5f", borderRadius: 12, padding: "14px 15px", marginBottom: 12 }}>
+        <div style={{ fontSize: 10, letterSpacing: "0.13em", textTransform: "uppercase", color: "#4a9eff", fontWeight: 700, marginBottom: 4 }}>
+          🔬 感度分析 — 90歳残高への影響
+        </div>
+        <div style={{ fontSize: 10, color: "#334455", marginBottom: 12 }}>
+          各前提を少し変えたとき、90歳時点の残高がどれだけ変わるかの目安です
+        </div>
+        {sensitivityData.map((item) => {
+          const base90 = withSale.data.find(d => d.age === 90)?.assets ?? 0;
+          const maxAbsDiff = Math.max(...sensitivityData.map(d => Math.abs(d.diff)), 1);
+          const barPct = Math.abs(item.diff) / maxAbsDiff * 100;
+          const isNeg = item.diff < 0;
+          return (
+            <div key={item.id} style={{ marginBottom: 9 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                <span style={{ fontSize: 11, color: "#889aaa" }}>{item.label}</span>
+                <span style={{ fontSize: 11, fontWeight: 600, color: isNeg ? "#ff8855" : "#4adfb0", fontVariantNumeric: "tabular-nums" }}>
+                  {isNeg ? "" : "+"}{fmtFull(item.diff)}
+                </span>
+              </div>
+              <div style={{ height: 6, borderRadius: 3, background: "#0a1020", overflow: "hidden" }}>
+                <div style={{ height: "100%", width: `${barPct}%`, background: isNeg ? "linear-gradient(90deg,#cc4422,#ff6644)" : "linear-gradient(90deg,#22aa66,#44ddaa)", borderRadius: 3 }} />
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
       {/* ── 3シナリオサマリー */}
       {triMode && triPessimistic && triOptimistic && (
@@ -1181,7 +1359,7 @@ export default function App() {
 
         {/* 資産 & 2バケツ */}
         <div style={P}>
-          <Sec title="資産 & 2バケツ配分">
+          <Sec title={<Tip term="bucket2">資産 & 2バケツ配分</Tip>}>
             <SliderInput label="現在の年齢" value={currentAge} min={30} max={70} step={1} unit="歳" onChange={setCurrentAge} />
             <SliderInput label="総資産" value={totalAssets} min={0} max={50000} step={100} unit=""
               display={v => fmtFull(v * 1e4)}
@@ -1293,7 +1471,7 @@ export default function App() {
         {/* 収入フェーズ */}
         <div style={IP}>
           <div style={{ fontSize: 10, letterSpacing: "0.13em", textTransform: "uppercase", color: "#2adf90", borderBottom: "1px solid #2adf9025", paddingBottom: 5, marginBottom: 11, fontWeight: 700 }}>収入フェーズ</div>
-          <SliderInput label="デフォルト手取り率" value={defaultTakeRate} min={50} max={100} step={1} unit="%" onChange={setDefaultTakeRate} accent="#2adf90" />
+          <SliderInput label={<Tip term="takeRate">デフォルト手取り率</Tip>} value={defaultTakeRate} min={50} max={100} step={1} unit="%" onChange={setDefaultTakeRate} accent="#2adf90" />
           <div style={{ background: "#001510", border: "1px solid #2adf9018", borderRadius: 7, padding: "5px 9px", marginBottom: 8, fontSize: 10, color: "#445566" }}>
             各フェーズで個別設定がない場合にこの値が使われます
           </div>
@@ -1366,7 +1544,7 @@ export default function App() {
             <Sec title="公的年金">
               <SliderInput label="受給開始年齢" value={pensionAge} min={60} max={75} step={1} unit="歳" onChange={setPensionAge} />
               <SliderInput label="月額（夫婦合算）" value={pensionAmount} min={5} max={50} step={1} unit="万/月" onChange={setPensionAmount} />
-              <SliderInput label="マクロ経済スライド（年率）" value={pensionSlideRate} min={-1.0} max={0} step={0.1} unit="%" onChange={setPensionSlideRate} accent="#4adfb0" />
+              <SliderInput label={<Tip term="macroSlide">マクロ経済スライド（年率）</Tip>} value={pensionSlideRate} min={-1.0} max={0} step={0.1} unit="%" onChange={setPensionSlideRate} accent="#4adfb0" />
               <div style={{ background: "#001510", border: "1px solid #2adf9018", borderRadius: 7, padding: "6px 9px" }}>
                 <InfoRow label={`受給開始から20年後（${pensionAge+20}歳）`} value={`${(pensionAmount * Math.pow(1 + pensionSlideRate/100, 20)).toFixed(1)}万/月`} color="#4adfb0" />
               </div>
@@ -1410,7 +1588,7 @@ export default function App() {
         <div style={{ ...P, borderColor: dwzEnabled ? "#a040f044" : "#1e3a5f", background: dwzEnabled ? "linear-gradient(160deg,#100818,#0e0615)" : undefined }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: dwzEnabled ? 14 : 0 }}>
             <div>
-              <div style={{ fontSize: 10, letterSpacing: "0.13em", textTransform: "uppercase", color: "#a040f0", fontWeight: 700 }}>Die with Zero モード</div>
+              <div style={{ fontSize: 10, letterSpacing: "0.13em", textTransform: "uppercase", color: "#a040f0", fontWeight: 700 }}><Tip term="DWZ">Die with Zero モード</Tip></div>
               {dwzEnabled && <div style={{ fontSize: 10, color: "#667788", marginTop: 2 }}>目標年齢での残高目標を設定</div>}
             </div>
             <Toggle value={dwzEnabled} onChange={setDwzEnabled} color="#a040f0" />
