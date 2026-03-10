@@ -1267,7 +1267,7 @@ export default function App() {
 
       {/* 売却サマリー */}
       {saleEnabled && (
-        <div style={{ ...LP, marginBottom: 12, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
+        <div style={{ ...LP, marginBottom: 12, display: "flex", alignItems: "center", justifyContent: "flex-start", flexWrap: "wrap", gap: 10 }}>
           <div>
             <div style={{ fontSize: 12, color: "#f0a040", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 700 }}>🏷 会社売却</div>
             <div style={{ fontSize: 19, color: "#f0c060", fontWeight: 700, marginTop: 2 }}>{saleSaleAge}歳 → 手取り {fmtFull(afterTax)}</div>
@@ -1303,7 +1303,7 @@ export default function App() {
             </div>
           ))}
         </div>
-        <div className="chart-height" style={{ height: 270 }}><ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height={270}>
           <AreaChart data={chartData} margin={{ top: 8, right: 8, left: 6, bottom: 0 }}>
             <defs>
               <linearGradient id="gInv" x1="0" y1="0" x2="0" y2="1">
@@ -1360,7 +1360,7 @@ export default function App() {
             {/* ストレスライン */}
             {stressMode && stressResult && <Line type="monotone" dataKey="assetsStress" stroke="#ffcc44" strokeWidth={1.5} dot={false} strokeDasharray="4 2" connectNulls />}
           </AreaChart>
-        </ResponsiveContainer></div>
+        </ResponsiveContainer>
       </div>
 
       {/* コントロール */}
