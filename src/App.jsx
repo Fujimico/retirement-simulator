@@ -1136,7 +1136,8 @@ export default function App() {
               </div>
             ) : (
               <div style={{ fontSize: 11, color: "#334455" }}>初期50%水準：生涯維持</div>
-            )}
+            );
+            })()}
           </div>
         );
       })()}
@@ -1688,11 +1689,18 @@ export default function App() {
             <div style={{ fontSize: 10, color: "#334455", marginBottom: 14 }}>
               ※ 現在の設定に基づく目安です。税務・実際の支出状況によって変わります。
             </div>
-            {!isSafe ? (
-              <div style={{ color: "#ff7799", fontSize: 12, padding: "10px", background: "#200a10", borderRadius: 8 }}>
-                現在の設定では資産が枯渇する見込みです。まず支出や収入の設定を見直してください。
-              </div>
-            ) : (
+            {(() => {
+              // DWZモード時はdwzTargetAgeまでの生存が目標、それ以降は考慮外
+              const effectivelySafe = isSafe || (dwzEnabled && (withSale.data.find(d => d.age === dwzTargetAge)?.assets ?? 0) >= 0);
+              const depletionBeforeDwz = dwzEnabled && withSale.depletionAge !== null && withSale.depletionAge <= dwzTargetAge;
+              if (!effectivelySafe || depletionBeforeDwz) return (
+                <div style={{ color: "#ff7799", fontSize: 12, padding: "10px", background: "#200a10", borderRadius: 8 }}>
+                  {dwzEnabled
+                    ? `${dwzTargetAge}歳までに資産が枯渇する見込みです。支出や収入の設定を見直してください。`
+                    : "現在の設定では資産が枯渇する見込みです。まず支出や収入の設定を見直してください。"}
+                </div>
+              );
+              return (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: 10 }}>
                 <div style={{ background: "#080f18", border: "1px solid #1a2a3a", borderRadius: 9, padding: "12px 13px" }}>
                   <div style={{ fontSize: 10, color: "#4a9eff", fontWeight: 700, marginBottom: 6 }}>💴 毎月の追加余力</div>
