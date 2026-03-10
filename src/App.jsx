@@ -1136,8 +1136,7 @@ export default function App() {
               </div>
             ) : (
               <div style={{ fontSize: 11, color: "#334455" }}>初期50%水準：生涯維持</div>
-            );
-            })()}
+            )}
           </div>
         );
       })()}
