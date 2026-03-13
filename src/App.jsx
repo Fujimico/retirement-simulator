@@ -852,7 +852,14 @@ export default function App() {
   return (
     <div className="print-page outer-pad" style={{ minHeight: "100vh", background: bgTheme.bg, color: bgTheme.color, fontFamily: "'DM Mono','Fira Code','Courier New',monospace", padding: "20px 16px", transition: "background 1s, color 0.5s" }}>
 
-      <div style={{ marginBottom: 18 }}>
+      <div style={{ marginBottom: 18, position: "relative" }}>
+        {/* ドクロ：早期枯渇時のみ表示 */}
+        {!isSafe && depletionAge !== null && depletionAge < 80 && (
+          <div style={{ position: "absolute", top: 0, right: 0, fontSize: 48, lineHeight: 1, userSelect: "none", animation: "skull-pulse 1.8s ease-in-out infinite" }}>
+            💀
+            <style>{`@keyframes skull-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.85)} }`}</style>
+          </div>
+        )}
         <div style={{ textAlign: "center" }}>
           <h1 style={{ margin: 0, fontSize: 26, fontWeight: 700, color: "#e8f0fe" }}>老後資産シミュレーター</h1>
           <div style={{ fontSize: 15, color: "#334455", marginTop: 3 }}>2バケツ方式（運用資産 / 手元資産）対応</div>
