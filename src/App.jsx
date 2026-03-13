@@ -1560,14 +1560,22 @@ export default function App() {
             <Sec title="公的年金">
               <SliderInput label="受給開始年齢" value={pensionAge} min={60} max={75} step={1} unit="歳" onChange={setPensionAge} />
               <SliderInput label="月額（夫婦合算）" value={pensionAmount} min={5} max={50} step={1} unit="万/月" onChange={setPensionAmount} />
+              <div style={{ fontSize: 13, color: "#778866", marginTop: -6, marginBottom: 2, paddingLeft: 1 }}>
+                手取り → <span style={{ fontWeight: 700, color: "#4adfb0" }}>{(pensionAmount * PENSION_TAKE_RATE).toFixed(1)}万/月</span>
+                <span style={{ color: "#334455", marginLeft: 6 }}>（控除等 {(pensionAmount * (1 - PENSION_TAKE_RATE)).toFixed(1)}万/月）</span>
+              </div>
               <SliderInput label={<Tip term="macroSlide">マクロ経済スライド（年率）</Tip>} value={pensionSlideRate} min={-1.0} max={0} step={0.1} unit="%" onChange={setPensionSlideRate} accent="#4adfb0" />
               <div style={{ background: "#001510", border: "1px solid #2adf9018", borderRadius: 7, padding: "6px 9px" }}>
-                <InfoRow label={`受給開始から20年後（${pensionAge+20}歳）`} value={`${(pensionAmount * Math.pow(1 + pensionSlideRate/100, 20)).toFixed(1)}万/月`} color="#4adfb0" />
+                <InfoRow label={`受給開始から20年後（${pensionAge+20}歳）`} value={`${(pensionAmount * PENSION_TAKE_RATE * Math.pow(1 + pensionSlideRate/100, 20)).toFixed(1)}万/月`} color="#4adfb0" />
               </div>
             </Sec>
             <Sec title="個人年金">
               <SliderInput label="受給開始年齢" value={privatePensionAge} min={55} max={75} step={1} unit="歳" onChange={setPrivatePensionAge} />
               <SliderInput label="月額" value={privatePensionAmount} min={0} max={30} step={1} unit="万/月" onChange={setPrivatePensionAmount} />
+              <div style={{ fontSize: 13, color: "#778866", marginTop: -6, marginBottom: 2, paddingLeft: 1 }}>
+                手取り → <span style={{ fontWeight: 700, color: "#4adfb0" }}>{(privatePensionAmount * PRIVATE_PENSION_TAKE_RATE).toFixed(1)}万/月</span>
+                <span style={{ color: "#334455", marginLeft: 6 }}>（控除等 {(privatePensionAmount * (1 - PRIVATE_PENSION_TAKE_RATE)).toFixed(1)}万/月）</span>
+              </div>
               <SliderInput label="受給期間" value={privatePensionYears} min={1} max={30} step={1} unit="年間" onChange={setPrivatePensionYears} />
             </Sec>
           </div>
