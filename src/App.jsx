@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, ResponsiveContainer, Area, AreaChart, Line } from "recharts";
 
 const fmt = (v) => {
@@ -50,7 +50,6 @@ function simulate({
   pensionAge, pensionAmount,
   privatePensionAge, privatePensionAmount, privatePensionYears,
   saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType,
-  salePostSalary, salePostSalaryYears,
   oneTimeIncomes, cashBufferMonths,
   defaultTakeRate, pensionSlideRate,
   incomeInvestRatioPct, windfallInvestRatioPct,
@@ -111,13 +110,10 @@ function simulate({
       const slideFactor = Math.pow(1 + pensionSlideRate / 100, slideYears);
       annualIncome += pensionAmount * 12 * 1e4 * slideFactor * PENSION_TAKE_RATE;
     }
-    if (saleEnabled && age >= saleSaleAge && age < saleSaleAge + salePostSalaryYears)
-      annualIncome += salePostSalary * 12 * 1e4;
-
     const saleEvent = saleEnabled && age === saleSaleAge ? saleProceeds : 0;
     let oneTimeInc = 0;
     for (const ev of oneTimeIncomes) {
-      if (ev.enabled && age === ev.age) oneTimeInc += ev.amount * 1e4;
+      if (ev.enabled && age === ev.age) oneTimeInc += ev.amount * 1e4 * ((ev.takeRate ?? 100) / 100);
     }
     const windfallIncome = saleEvent + oneTimeInc;
     const totalIncome = annualIncome + windfallIncome;
@@ -410,37 +406,8 @@ const EventRow = ({ ev, onUpdate, onDelete }) => (
   </div>
 );
 
-const StockCalc = ({ onApply }) => {
-  const [shares, setShares] = useState(10000);
-  const [price, setPrice] = useState(30000);
-  const gross = Math.round(shares * price / 1e4);
-  return (
-    <div style={{ background: "#0a0800", border: "1px solid #f0a04030", borderRadius: 8, padding: "10px 12px", marginBottom: 12 }}>
-      <div style={{ fontSize: 14, color: "#aa7722", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8, fontWeight: 700 }}>株数 × 単価 → グロス計算</div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
-        <div>
-          <div style={{ ...S, fontSize: 14, marginBottom: 3 }}>株数</div>
-          <input type="number" value={shares} min={1} onChange={e => setShares(Number(e.target.value))}
-            style={{ width: "100%", background: "#060e18", border: "1px solid #2a1e00", borderRadius: 5, color: "#e8f0fe", padding: "5px 7px", fontSize: 16, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} />
-        </div>
-        <div>
-          <div style={{ ...S, fontSize: 14, marginBottom: 3 }}>単価（円/株）</div>
-          <input type="number" value={price} min={1} onChange={e => setPrice(Number(e.target.value))}
-            style={{ width: "100%", background: "#060e18", border: "1px solid #2a1e00", borderRadius: 5, color: "#e8f0fe", padding: "5px 7px", fontSize: 16, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} />
-        </div>
-      </div>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div>
-          <span style={{ color: "#667788", fontSize: 14 }}>売却総額 → </span>
-          <span style={{ color: "#f0c060", fontWeight: 700, fontSize: 18, fontVariantNumeric: "tabular-nums" }}>{fmtFull(gross * 1e4)}</span>
-        </div>
-        <button onClick={() => onApply(gross)} style={{ background: "#2a1800", border: "1px solid #f0a04066", borderRadius: 6, color: "#f0a040", fontSize: 15, padding: "5px 10px", cursor: "pointer", fontFamily: "inherit", fontWeight: 600 }}>
-          ↑ 上に反映
-        </button>
-      </div>
-    </div>
-  );
-};
+
+
 
 // ── 2バケツ配分バー
 const BucketBar = ({ totalAssets, investedAssets, onChange }) => {
@@ -526,8 +493,8 @@ export default function App() {
   const [nextEventId, setNextEventId] = useState(2);
 
   const [oneTimeIncomes, setOneTimeIncomes] = useState([
-    { id: 1, label: "退職金", age: 60, amount: 500, enabled: false },
-    { id: 2, label: "相続（実家）", age: 70, amount: 2000, enabled: false },
+    { id: 1, label: "退職金", age: 60, amount: 500, enabled: false, takeRate: 90 },
+    { id: 2, label: "相続（実家）", age: 70, amount: 2000, enabled: false, takeRate: 95 },
   ]);
   const [nextIncomeEventId, setNextIncomeEventId] = useState(3);
   const [cashBufferMonths, setCashBufferMonths] = useState(24);
@@ -560,8 +527,6 @@ export default function App() {
   const [saleGross, setSaleGross] = useState(30000);
   const [saleBookValue, setSaleBookValue] = useState(1000);
   const [saleTaxType, setSaleTaxType] = useState("stock");
-  const [salePostSalary, setSalePostSalary] = useState(50);
-  const [salePostSalaryYears, setSalePostSalaryYears] = useState(2);
 
   const safeInvested = Math.min(investedAssets, totalAssets);
   const investRatioPctCalc = totalAssets > 0 ? Math.round(safeInvested / totalAssets * 100) : 60;
@@ -584,11 +549,11 @@ export default function App() {
   };
 
   const withSale = useMemo(() => simulate({
-    ...simParams, saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType, salePostSalary, salePostSalaryYears
-  }), [JSON.stringify(simParams), saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType, salePostSalary, salePostSalaryYears]);
+    ...simParams, saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType
+  }), [JSON.stringify(simParams), saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType]);
 
   const noSale = useMemo(() => simulate({
-    ...simParams, saleEnabled: false, saleSaleAge: 0, saleGross: 0, saleBookValue: 0, saleTaxType: "stock", salePostSalary: 0, salePostSalaryYears: 0
+    ...simParams, saleEnabled: false, saleSaleAge: 0, saleGross: 0, saleBookValue: 0, saleTaxType: "stock"
   }), [JSON.stringify(simParams)]);
 
   // ── 3シナリオ表示
@@ -601,22 +566,22 @@ export default function App() {
   // ── 3シナリオ計算
   const triPessimistic = useMemo(() => triMode ? simulate({
     ...simParams,
-    saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType, salePostSalary, salePostSalaryYears,
+    saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType,
     returnRate: returnRate + TRI_PESSIMISTIC.returnDelta,
     inflationRate: inflationRate + TRI_PESSIMISTIC.inflDelta,
-  }) : null, [triMode, JSON.stringify(simParams), saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType, salePostSalary, salePostSalaryYears, returnRate, inflationRate]);
+  }) : null, [triMode, JSON.stringify(simParams), saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType, returnRate, inflationRate]);
 
   const triOptimistic = useMemo(() => triMode ? simulate({
     ...simParams,
-    saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType, salePostSalary, salePostSalaryYears,
+    saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType,
     returnRate: returnRate + TRI_OPTIMISTIC.returnDelta,
     inflationRate: inflationRate + TRI_OPTIMISTIC.inflDelta,
-  }) : null, [triMode, JSON.stringify(simParams), saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType, salePostSalary, salePostSalaryYears, returnRate, inflationRate]);
+  }) : null, [triMode, JSON.stringify(simParams), saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType, returnRate, inflationRate]);
 
   // ── ストレステスト計算
   const stressResult = useMemo(() => {
     if (!stressMode) return null;
-    const base = { ...simParams, saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType, salePostSalary, salePostSalaryYears };
+    const base = { ...simParams, saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType };
     switch (stressPresetId) {
       case "asset_shock":
         return simulate({ ...base, stressAssetShockAge: currentAge });
@@ -630,7 +595,7 @@ export default function App() {
       default:
         return null;
     }
-  }, [stressMode, stressPresetId, JSON.stringify(simParams), saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType, salePostSalary, salePostSalaryYears, inflationRate, currentAge]);
+  }, [stressMode, stressPresetId, JSON.stringify(simParams), saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType, inflationRate, currentAge]);
 
   const chartData = useMemo(() => withSale.data.map((d, i) => ({
     ...d,
@@ -653,7 +618,7 @@ export default function App() {
     { id: "sale-3yr",    label: "売却 3年遅れ",           always: false },
   ];
   const sensitivityData = useMemo(() => {
-    const base = { ...simParams, saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType, salePostSalary, salePostSalaryYears };
+    const base = { ...simParams, saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType };
     const baseAt90 = withSale.data.find(d => d.age === 90)?.assets ?? 0;
     return SENSITIVITY_ITEMS
       .filter(item => item.always || saleEnabled)
@@ -682,7 +647,7 @@ export default function App() {
       })
       .sort((a, b) => a.diff - b.diff); // 影響大きい順（マイナスが大きい順）
   }, [JSON.stringify(simParams), saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType,
-      salePostSalary, salePostSalaryYears, returnRate, inflationRate, expensePhases, withSale]);
+      returnRate, inflationRate, expensePhases, withSale]);
 
   // ── 危険水域入り年齢（追加2）
   const dangerZone = useMemo(() => {
@@ -717,7 +682,8 @@ export default function App() {
   const [solverResult, setSolverResult] = useState(null); // {delta, deltaDwz}
   const [saveNameInput, setSaveNameInput] = useState("");
   const [showSaveModal, setShowSaveModal] = useState(false);
-  const [storageReady, setStorageReady] = useState(false);
+
+
 
   const getCurrentParams = useCallback(() => ({
     currentAge, totalAssets, investedAssets,
@@ -726,7 +692,7 @@ export default function App() {
     pensionAge, pensionAmount,
     privatePensionAge, privatePensionAmount, privatePensionYears,
     saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType,
-    salePostSalary, salePostSalaryYears,
+   
     dwzEnabled, dwzTargetAge, dwzTargetAmount,
     oneTimeIncomes, cashBufferMonths,
     defaultTakeRate, pensionSlideRate,
@@ -735,17 +701,29 @@ export default function App() {
     expensePhases, inflationRate, returnRate, pensionAge, pensionAmount,
     privatePensionAge, privatePensionAmount, privatePensionYears,
     saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType,
-    salePostSalary, salePostSalaryYears, dwzEnabled, dwzTargetAge, dwzTargetAmount,
+    dwzEnabled, dwzTargetAge, dwzTargetAmount,
     oneTimeIncomes, cashBufferMonths, defaultTakeRate, pensionSlideRate,
     incomeInvestRatioPct, windfallInvestRatioPct]);
+
+  // window.storage（Claude artifacts）がない環境ではlocalStorageにfallback
+  const storage = {
+    get: async (key) => {
+      if (window.storage?.get) return window.storage.get(key);
+      const v = localStorage.getItem(key);
+      return v ? { value: v } : null;
+    },
+    set: async (key, value) => {
+      if (window.storage?.set) return window.storage.set(key, value);
+      localStorage.setItem(key, value);
+    },
+  };
 
   useEffect(() => {
     (async () => {
       try {
-        const result = await window.storage.get('scenarios');
+        const result = await storage.get('scenarios');
         if (result?.value) setSavedScenarios(JSON.parse(result.value));
       } catch(e) { /* 初回は空 */ }
-      setStorageReady(true);
     })();
   }, []);
 
@@ -758,7 +736,7 @@ export default function App() {
     };
     const updated = [...savedScenarios, newScenario];
     setSavedScenarios(updated);
-    try { await window.storage.set('scenarios', JSON.stringify(updated)); } catch(e) {}
+    try { await storage.set('scenarios', JSON.stringify(updated)); } catch(e) {}
     setShowSaveModal(false);
     setSaveNameInput("");
   };
@@ -766,7 +744,7 @@ export default function App() {
   const deleteScenario = async (id) => {
     const updated = savedScenarios.filter(s => s.id !== id);
     setSavedScenarios(updated);
-    try { await window.storage.set('scenarios', JSON.stringify(updated)); } catch(e) {}
+    try { await storage.set('scenarios', JSON.stringify(updated)); } catch(e) {}
   };
 
   const SCENARIO_COLORS = ["#4a9eff","#2adf90","#f0a040","#aa88ff","#ff8866","#ffcc44"];
@@ -787,7 +765,7 @@ export default function App() {
     const baseParams = {
       ...simParams,
       saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType,
-      salePostSalary, salePostSalaryYears,
+     
     };
     const check = (delta, dwzMode) => {
       const phases = expensePhases.map(p =>
@@ -829,7 +807,7 @@ export default function App() {
     }
     setSolverResult({ delta, deltaDwz, depletionAge: null });
   }, [simParams, saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType,
-      salePostSalary, salePostSalaryYears, expensePhases, dwzEnabled, dwzTargetAge,
+      expensePhases, dwzEnabled, dwzTargetAge,
       dwzTargetAmount, withSale]);
 
   const applyDelta = useCallback((delta) => {
@@ -955,7 +933,6 @@ export default function App() {
                     ...ep,
                     saleEnabled: p.saleEnabled, saleSaleAge: p.saleSaleAge, saleGross: p.saleGross,
                     saleBookValue: p.saleBookValue, saleTaxType: p.saleTaxType,
-                    salePostSalary: p.salePostSalary, salePostSalaryYears: p.salePostSalaryYears,
                   });
                   const color = SCENARIO_COLORS[si % SCENARIO_COLORS.length];
                   const safe = res.depletionAge === null;
@@ -1067,7 +1044,7 @@ export default function App() {
                   {savedScenarios.map(sc => {
                     const p = sc.params;
                     const ep = { ...p, investedAssets: Math.min(p.investedAssets, p.totalAssets) };
-                    const res = simulate({ ...ep, saleEnabled: p.saleEnabled, saleSaleAge: p.saleSaleAge, saleGross: p.saleGross, saleBookValue: p.saleBookValue, saleTaxType: p.saleTaxType, salePostSalary: p.salePostSalary, salePostSalaryYears: p.salePostSalaryYears });
+                    const res = simulate({ ...ep, saleEnabled: p.saleEnabled, saleSaleAge: p.saleSaleAge, saleGross: p.saleGross, saleBookValue: p.saleBookValue, saleTaxType: p.saleTaxType });
                     const safe = res.depletionAge === null;
                     return (
                       <tr key={sc.id}>
@@ -1549,20 +1526,37 @@ export default function App() {
               <span /><span style={{ ...S, fontSize: 14 }}>名称</span><span style={{ ...S, fontSize: 14 }}>年齢</span><span style={{ ...S, fontSize: 14 }}>金額(万)</span><span />
             </div>
             {oneTimeIncomes.map(ev => (
-              <div key={ev.id} style={{ display: "grid", gridTemplateColumns: "auto 1fr 50px 54px 20px", gap: 4, alignItems: "center", marginBottom: 6 }}>
-                <Toggle value={ev.enabled} onChange={v => setOneTimeIncomes(es => es.map(e => e.id === ev.id ? { ...e, enabled: v } : e))} color="#2adf90" />
-                <input value={ev.label} onChange={e => setOneTimeIncomes(es => es.map(x => x.id === ev.id ? { ...x, label: e.target.value } : x))}
-                  style={{ background: "#060e18", border: "1px solid #1e3a5f", borderRadius: 5, color: "#c8d8e8", padding: "4px 6px", fontSize: 15, outline: "none", fontFamily: "inherit", width: "100%" }} />
-                <NumCell value={ev.age} min={1} max={100} onChange={v => setOneTimeIncomes(es => es.map(e => e.id === ev.id ? { ...e, age: v } : e))} />
-                <NumCell value={ev.amount} min={0} max={99999} onChange={v => setOneTimeIncomes(es => es.map(e => e.id === ev.id ? { ...e, amount: v } : e))} />
-                <button onClick={() => setOneTimeIncomes(es => es.filter(e => e.id !== ev.id))} style={{ background: "none", border: "none", color: "#334455", cursor: "pointer", fontSize: 17, padding: 0, lineHeight: 1 }}>✕</button>
+              <div key={ev.id} style={{ background: "#060e18", border: "1px solid #1e3a5f", borderRadius: 8, padding: "8px 10px", marginBottom: 8 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "auto 1fr 50px 54px 20px", gap: 4, alignItems: "center", marginBottom: ev.enabled ? 8 : 0 }}>
+                  <Toggle value={ev.enabled} onChange={v => setOneTimeIncomes(es => es.map(e => e.id === ev.id ? { ...e, enabled: v } : e))} color="#2adf90" />
+                  <input value={ev.label} onChange={e => setOneTimeIncomes(es => es.map(x => x.id === ev.id ? { ...x, label: e.target.value } : x))}
+                    style={{ background: "transparent", border: "none", borderBottom: "1px solid #1e3a5f", color: "#c8d8e8", padding: "4px 6px", fontSize: 15, outline: "none", fontFamily: "inherit", width: "100%" }} />
+                  <NumCell value={ev.age} min={1} max={100} onChange={v => setOneTimeIncomes(es => es.map(e => e.id === ev.id ? { ...e, age: v } : e))} />
+                  <NumCell value={ev.amount} min={0} max={99999} onChange={v => setOneTimeIncomes(es => es.map(e => e.id === ev.id ? { ...e, amount: v } : e))} />
+                  <button onClick={() => setOneTimeIncomes(es => es.filter(e => e.id !== ev.id))} style={{ background: "none", border: "none", color: "#334455", cursor: "pointer", fontSize: 17, padding: 0, lineHeight: 1 }}>✕</button>
+                </div>
+                {ev.enabled && (
+                  <div style={{ paddingLeft: 2 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 3 }}>
+                      <span style={{ fontSize: 13, color: "#445566" }}>手取り率</span>
+                      <span style={{ fontSize: 15, fontWeight: 700, color: "#aaddaa" }}>{ev.takeRate ?? 100}%</span>
+                    </div>
+                    <input type="range" min={50} max={100} step={1} value={ev.takeRate ?? 100}
+                      onChange={e => setOneTimeIncomes(es => es.map(x => x.id === ev.id ? { ...x, takeRate: Number(e.target.value) } : x))}
+                      style={{ width: "100%", accentColor: "#2adf90", cursor: "pointer" }} />
+                    <div style={{ fontSize: 13, color: "#778866", marginTop: 3 }}>
+                      手取り → <span style={{ fontWeight: 700, color: "#2adf90" }}>{fmtFull(ev.amount * 1e4 * (ev.takeRate ?? 100) / 100)}</span>
+                      <span style={{ color: "#334455", marginLeft: 6 }}>（税等 {fmtFull(ev.amount * 1e4 * (100 - (ev.takeRate ?? 100)) / 100)}）</span>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
-            <AddBtn onClick={() => { setOneTimeIncomes(es => [...es, { id: nextIncomeEventId, label: "一時収入", age: currentAge + 10, amount: 500, enabled: true }]); setNextIncomeEventId(n => n + 1); }} color="#2adf90">＋ 一時収入を追加</AddBtn>
+            <AddBtn onClick={() => { setOneTimeIncomes(es => [...es, { id: nextIncomeEventId, label: "一時収入", age: currentAge + 10, amount: 500, enabled: true, takeRate: 90 }]); setNextIncomeEventId(n => n + 1); }} color="#2adf90">＋ 一時収入を追加</AddBtn>
             {oneTimeIncomes.filter(e => e.enabled).length > 0 && (
               <div style={{ marginTop: 8, background: "#001510", border: "1px solid #2adf9018", borderRadius: 7, padding: "7px 9px" }}>
-                {oneTimeIncomes.filter(e => e.enabled).map(ev => <InfoRow key={ev.id} label={`${ev.age}歳: ${ev.label}`} value={`+${fmtFull(ev.amount * 1e4)}`} color="#2adf90" />)}
-                <InfoRow label="合計" value={`+${fmtFull(oneTimeIncomes.filter(e=>e.enabled).reduce((a,e) => a + e.amount, 0) * 1e4)}`} color="#2adf90" />
+                {oneTimeIncomes.filter(e => e.enabled).map(ev => <InfoRow key={ev.id} label={`${ev.age}歳: ${ev.label}`} value={`+${fmtFull(ev.amount * 1e4 * (ev.takeRate ?? 100) / 100)}`} color="#2adf90" />)}
+                <InfoRow label="合計（手取り）" value={`+${fmtFull(oneTimeIncomes.filter(e=>e.enabled).reduce((a,e) => a + e.amount * (e.takeRate ?? 100) / 100, 0) * 1e4)}`} color="#2adf90" />
               </div>
             )}
           </Sec>
@@ -1602,21 +1596,16 @@ export default function App() {
             {saleEnabled && (
               <>
                 <SliderInput label="売却実行年齢" value={saleSaleAge} min={currentAge} max={70} step={1} unit="歳" onChange={setSaleSaleAge} accent="#f0a040" />
-                <SliderInput label="売却総額（グロス）" value={saleGross} min={1000} max={200000} step={1000} unit="" display={v => fmtFull(v * 1e4)} onChange={setSaleGross} accent="#f0a040" />
+                <SliderInput label="自分の取り分（税引前）" value={saleGross} min={1000} max={50000} step={500} unit="" display={v => fmtFull(v * 1e4)} onChange={setSaleGross} accent="#f0a040" />
                 <SliderInput label="株式簿価" value={saleBookValue} min={0} max={10000} step={10} unit="" display={v => fmtFull(v * 1e4)} onChange={setSaleBookValue} accent="#f0a040" />
                 <div style={{ ...S, marginBottom: 6 }}>譲渡方式</div>
                 <TaxRadio value={saleTaxType} onChange={setSaleTaxType} />
-                <StockCalc onApply={setSaleGross} />
                 <div style={{ background: "#0a0800", border: "1px solid #f0a04028", borderRadius: 7, padding: "8px 11px", marginBottom: 12 }}>
                   <InfoRow label="税引後手取り" value={fmtFull(afterTax)} color="#f0c060" />
                   <InfoRow label="税負担" value={fmtFull(taxAmount)} color="#ff8899" />
                   <InfoRow label="うち運用バケツへ" value={fmtFull(afterTax * investRatioPct / 100)} color="#4a9eff" />
                   <InfoRow label="うち手元バケツへ" value={fmtFull(afterTax * (100 - investRatioPct) / 100)} color="#4adfb0" />
                 </div>
-                <Sec title="売却後 引継ぎ報酬" color="#f0a040">
-                  <SliderInput label="月額報酬" value={salePostSalary} min={0} max={200} step={5} unit="万/月" onChange={setSalePostSalary} accent="#f0a040" />
-                  <SliderInput label="期間" value={salePostSalaryYears} min={0} max={5} step={1} unit="年間" onChange={setSalePostSalaryYears} accent="#f0a040" />
-                </Sec>
               </>
             )}
           </div>
