@@ -842,8 +842,15 @@ export default function App() {
   const IP  = { ...P, borderColor: "#2adf9033", background: "linear-gradient(160deg,#001510,#001a14)" };
   const LOP = { ...P, borderColor: "#aa88ff33", background: "linear-gradient(160deg,#0d0820,#0a0618)" };
 
+  const depletionAge = withSale.depletionAge;
+  const bgTheme = isSafe
+    ? { bg: "#04120a", color: "#c8e8d8" }                          // 安全圏：深緑
+    : depletionAge !== null && depletionAge < 80
+    ? { bg: "#120408", color: "#e8c0cc" }                          // 早期枯渇：おどろおどろしい赤紫
+    : { bg: "#060e18", color: "#c8d8e8" };                         // ギリギリ：デフォルト
+
   return (
-    <div className="print-page outer-pad" style={{ minHeight: "100vh", background: "#060e18", color: "#c8d8e8", fontFamily: "'DM Mono','Fira Code','Courier New',monospace", padding: "20px 16px" }}>
+    <div className="print-page outer-pad" style={{ minHeight: "100vh", background: bgTheme.bg, color: bgTheme.color, fontFamily: "'DM Mono','Fira Code','Courier New',monospace", padding: "20px 16px", transition: "background 1s, color 0.5s" }}>
 
       <div style={{ marginBottom: 18 }}>
         <div style={{ textAlign: "center" }}>
