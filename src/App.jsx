@@ -18,6 +18,12 @@ const STOCK_TAX = 0.20315;
 const calcAfterTax = (gross, book, type) =>
   type === "stock" ? gross - Math.max(gross - book, 0) * STOCK_TAX : gross * 0.55;
 
+// ── 年金手取り率（公的年金控除・必要経費控除後の簡易近似）
+// 公的年金：65歳以上・年200万前後で実効税率5%程度
+// 個人年金：必要経費控除後の課税部分に10%程度
+const PENSION_TAKE_RATE         = 0.95; // 公的年金手取り率
+const PRIVATE_PENSION_TAKE_RATE = 0.90; // 個人年金手取り率
+
 
 // ── 3シナリオ差分定数（後から変更しやすいように定数化）
 const TRI_PESSIMISTIC = { returnDelta: -2.0, inflDelta: +1.0 };
@@ -99,11 +105,11 @@ function simulate({
       }
     }
     if (age >= privatePensionAge && age < privatePensionAge + privatePensionYears)
-      annualIncome += privatePensionAmount * 12 * 1e4;
+      annualIncome += privatePensionAmount * 12 * 1e4 * PRIVATE_PENSION_TAKE_RATE;
     if (age >= pensionAge) {
       const slideYears = age - pensionAge;
       const slideFactor = Math.pow(1 + pensionSlideRate / 100, slideYears);
-      annualIncome += pensionAmount * 12 * 1e4 * slideFactor;
+      annualIncome += pensionAmount * 12 * 1e4 * slideFactor * PENSION_TAKE_RATE;
     }
     if (saleEnabled && age >= saleSaleAge && age < saleSaleAge + salePostSalaryYears)
       annualIncome += salePostSalary * 12 * 1e4;
@@ -1766,7 +1772,7 @@ export default function App() {
       })()}
 
       <div style={{ textAlign: "center", marginTop: 16, fontSize: 14, color: "#2a3a4a" }}>
-        ※ 試算ツール。税務・資産設計は専門家にご相談ください。　v11: 3シナリオ・ストレステスト・生活言語翻訳 追加
+        ※ 試算ツール。税務・資産設計は専門家にご相談ください。　v11.1: 年金収入を手取り換算（公的95%・個人90%）
       </div>
     </div>
   );
