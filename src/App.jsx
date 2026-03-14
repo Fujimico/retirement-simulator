@@ -1520,7 +1520,7 @@ export default function App() {
             </div>
           ))}
         </div>
-        <div className="print-chart-wrap">
+        <div className="print-chart-wrap" style={{ height: 270 }}>
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartData} margin={{ top: 8, right: 8, left: 6, bottom: 10 }}>
             <defs>
