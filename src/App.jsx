@@ -154,8 +154,16 @@ function simulate({
       annualIncome += privatePensionAmount * 12 * 1e4 * PRIVATE_PENSION_TAKE_RATE;
     if (age >= pensionAge) {
       const slideYears = age - pensionAge;
-      const pensionGrowthRate = (inflationRate + pensionSlideRate) / 100;
-      const slideFactor = Math.pow(1 + pensionGrowthRate, slideYears);
+      let slideFactor = 1;
+      for (let y = 0; y < slideYears; y++) {
+        const absoluteYearFromNow = (pensionAge - currentAge) + y;
+        const effectiveInflationRate =
+          (stressExtraInflYears != null && stressExtraInflPt != null && absoluteYearFromNow < stressExtraInflYears)
+            ? inflationRate + stressExtraInflPt
+            : inflationRate;
+        const pensionGrowthRate = Math.max(0, (effectiveInflationRate + pensionSlideRate) / 100);
+        slideFactor *= (1 + pensionGrowthRate);
+      }
       annualIncome += pensionAmount * 12 * 1e4 * slideFactor * PENSION_TAKE_RATE;
     }
     const saleEvent = saleEnabled && age === saleSaleAge ? saleProceeds : 0;
