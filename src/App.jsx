@@ -534,10 +534,10 @@ export default function App() {
   useEffect(() => {
     if (incomeInvestRatioPct === null) setIncomeInvestRatioPct(investRatioPctCalc);
     if (windfallInvestRatioPct === null) setWindfallInvestRatioPct(investRatioPctCalc);
-  }, []);
+  }, [incomeInvestRatioPct, windfallInvestRatioPct, investRatioPctCalc]);
   const investRatioPct = totalAssets > 0 ? Math.round(safeInvested / totalAssets * 100) : 0;
 
-  const simParams = {
+  const simParams = useMemo(() => ({
     currentAge, totalAssets, investedAssets: safeInvested,
     incomePhases, loans, oneTimeEvents,
     expensePhases, inflationRate, returnRate,
@@ -546,15 +546,26 @@ export default function App() {
     oneTimeIncomes, cashBufferMonths,
     defaultTakeRate, pensionSlideRate,
     incomeInvestRatioPct, windfallInvestRatioPct,
-  };
+  }), [
+    currentAge, totalAssets, safeInvested,
+    incomePhases, loans, oneTimeEvents,
+    expensePhases, inflationRate, returnRate,
+    pensionAge, pensionAmount,
+    privatePensionAge, privatePensionAmount, privatePensionYears,
+    oneTimeIncomes, cashBufferMonths,
+    defaultTakeRate, pensionSlideRate,
+    incomeInvestRatioPct, windfallInvestRatioPct,
+  ]);
+
+  const simParamsKey = useMemo(() => JSON.stringify(simParams), [simParams]);
 
   const withSale = useMemo(() => simulate({
     ...simParams, saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType
-  }), [JSON.stringify(simParams), saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType]);
+  }), [simParamsKey, saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType]);
 
   const noSale = useMemo(() => simulate({
     ...simParams, saleEnabled: false, saleSaleAge: 0, saleGross: 0, saleBookValue: 0, saleTaxType: "stock"
-  }), [JSON.stringify(simParams)]);
+  }), [simParamsKey]);
 
   // ── 3シナリオ表示
   const [triMode, setTriMode] = useState(false);
@@ -569,14 +580,14 @@ export default function App() {
     saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType,
     returnRate: returnRate + TRI_PESSIMISTIC.returnDelta,
     inflationRate: inflationRate + TRI_PESSIMISTIC.inflDelta,
-  }) : null, [triMode, JSON.stringify(simParams), saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType, returnRate, inflationRate]);
+  }) : null, [triMode, simParamsKey, saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType, returnRate, inflationRate]);
 
   const triOptimistic = useMemo(() => triMode ? simulate({
     ...simParams,
     saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType,
     returnRate: returnRate + TRI_OPTIMISTIC.returnDelta,
     inflationRate: inflationRate + TRI_OPTIMISTIC.inflDelta,
-  }) : null, [triMode, JSON.stringify(simParams), saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType, returnRate, inflationRate]);
+  }) : null, [triMode, simParamsKey, saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType, returnRate, inflationRate]);
 
   // ── ストレステスト計算
   const stressResult = useMemo(() => {
@@ -595,7 +606,7 @@ export default function App() {
       default:
         return null;
     }
-  }, [stressMode, stressPresetId, JSON.stringify(simParams), saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType, inflationRate, currentAge]);
+  }, [stressMode, stressPresetId, simParamsKey, saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType, inflationRate, currentAge]);
 
   const chartData = useMemo(() => withSale.data.map((d, i) => ({
     ...d,
@@ -646,7 +657,7 @@ export default function App() {
         return { ...item, at90, diff: at90 - baseAt90 };
       })
       .sort((a, b) => a.diff - b.diff); // 影響大きい順（マイナスが大きい順）
-  }, [JSON.stringify(simParams), saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType,
+  }, [simParamsKey, saleEnabled, saleSaleAge, saleGross, saleBookValue, saleTaxType,
       returnRate, inflationRate, expensePhases, withSale]);
 
   // ── 危険水域入り年齢（追加2）
@@ -706,24 +717,30 @@ export default function App() {
     incomeInvestRatioPct, windfallInvestRatioPct]);
 
   // window.storage（Claude artifacts）がない環境ではlocalStorageにfallback
-  const storage = {
+  const storage = useMemo(() => ({
     get: async (key) => {
+      if (typeof window === "undefined") return null;
       if (window.storage?.get) return window.storage.get(key);
+      if (typeof localStorage === "undefined") return null;
       const v = localStorage.getItem(key);
       return v ? { value: v } : null;
     },
     set: async (key, value) => {
+      if (typeof window === "undefined") return;
       if (window.storage?.set) return window.storage.set(key, value);
+      if (typeof localStorage === "undefined") return;
       localStorage.setItem(key, value);
     },
-  };
+  }), []);
 
   useEffect(() => {
     (async () => {
       try {
         const result = await storage.get('scenarios');
         if (result?.value) setSavedScenarios(JSON.parse(result.value));
-      } catch(e) { /* 初回は空 */ }
+      } catch {
+        // 初回は空
+      }
     })();
   }, []);
 
@@ -736,7 +753,9 @@ export default function App() {
     };
     const updated = [...savedScenarios, newScenario];
     setSavedScenarios(updated);
-    try { await storage.set('scenarios', JSON.stringify(updated)); } catch(e) {}
+    try {
+      await storage.set('scenarios', JSON.stringify(updated));
+    } catch {}
     setShowSaveModal(false);
     setSaveNameInput("");
   };
@@ -744,7 +763,9 @@ export default function App() {
   const deleteScenario = async (id) => {
     const updated = savedScenarios.filter(s => s.id !== id);
     setSavedScenarios(updated);
-    try { await storage.set('scenarios', JSON.stringify(updated)); } catch(e) {}
+    try {
+      await storage.set('scenarios', JSON.stringify(updated));
+    } catch {}
   };
 
   const SCENARIO_COLORS = ["#4a9eff","#2adf90","#f0a040","#aa88ff","#ff8866","#ffcc44"];
@@ -1078,7 +1099,7 @@ export default function App() {
               {[
                 { label: "現在の年齢",    value: `${currentAge}歳` },
                 { label: "総資産",        value: fmtFull(totalAssets * 1e4) },
-                { label: "うち運用資産",  value: fmtFull(safeInvested * 1e4), sub: `（全体の${Math.round(safeInvested/totalAssets*100)}%）` },
+                { label: "うち運用資産",  value: fmtFull(safeInvested * 1e4), sub: `（全体の${totalAssets > 0 ? Math.round(safeInvested / totalAssets * 100) : 0}%）` },
                 { label: "うち現金資産",  value: fmtFull(cashAssets * 1e4) },
                 { label: "月間生活費",    value: `${firstPhase?.monthly ?? "—"}万円/月`, sub: firstPhase ? `（${firstPhase.label}）` : "" },
                 { label: "公的年金",      value: `${pensionAge}歳〜 ${(pensionAmount * PENSION_TAKE_RATE).toFixed(1)}万/月`, sub: "（手取り）" },
@@ -1156,7 +1177,6 @@ export default function App() {
           各前提を少し変えたとき、90歳時点の残高がどれだけ変わるかの目安です
         </div>
         {sensitivityData.map((item) => {
-          const base90 = withSale.data.find(d => d.age === 90)?.assets ?? 0;
           const maxAbsDiff = Math.max(...sensitivityData.map(d => Math.abs(d.diff)), 1);
           const barPct = Math.abs(item.diff) / maxAbsDiff * 100;
           const isNeg = item.diff < 0;
@@ -1384,7 +1404,7 @@ export default function App() {
               <span /><span style={{ ...S, fontSize: 14 }}>期間名</span><span style={{ ...S, fontSize: 14 }}>開始</span><span />
               <span style={{ ...S, fontSize: 14 }}>終了</span><span style={{ ...S, fontSize: 14 }}>万/月</span><span />
             </div>
-            {expensePhases.map((ph, idx) => (
+            {expensePhases.map((ph) => (
               <div key={ph.id} style={{ display: "grid", gridTemplateColumns: "14px 1fr 46px 8px 46px 52px 20px", gap: 4, alignItems: "center", marginBottom: 6, minWidth: 300 }}>
                 <div style={{ width: 8, height: 8, borderRadius: "50%", background: ph.enabled ? "#ff8899" : "#334455", margin: "0 auto", cursor: "pointer" }}
                   onClick={() => setExpensePhases(ps => ps.map(p => p.id === ph.id ? { ...p, enabled: !p.enabled } : p))} />
