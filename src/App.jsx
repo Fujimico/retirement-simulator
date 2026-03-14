@@ -581,6 +581,9 @@ const MOBILE_STYLE = `
 }
 `;
 const PRINT_STYLE = `
+.print-chart-wrap { height: 270px; }
+.print-chart-break { display: none; }
+
 @media print {
   body { background: #fff !important; color: #111 !important; }
   .no-print { display: none !important; }
@@ -588,15 +591,11 @@ const PRINT_STYLE = `
   .print-only-wrap { display: block !important; }
   .print-page { background: #fff !important; color: #111 !important; padding: 12px !important; }
   .print-section { background: #f8f8f8 !important; border: 1px solid #ccc !important; border-radius: 6px !important; padding: 12px !important; margin-bottom: 10px !important; break-inside: avoid; page-break-inside: avoid; overflow: visible !important; }
-  .print-chart-wrap { height: 270px; }
-  .print-chart-break { display: none; }
+  .print-chart-wrap { height: 205px !important; overflow: visible !important; }
+  .print-chart-break { display: block; break-after: page; page-break-after: always; }
   .print-main-chart { break-inside: avoid; page-break-inside: avoid; }
   .print-main-table { break-inside: avoid; page-break-inside: avoid; }
   .recharts-wrapper, .recharts-surface { overflow: visible !important; }
-  @media print {
-    .print-chart-wrap { height: 205px !important; overflow: visible !important; }
-    .print-chart-break { display: block; break-after: page; page-break-after: always; }
-  }
   .print-title { color: #111 !important; }
   .print-value { color: #222 !important; font-weight: 700; }
   .print-label { color: #555 !important; }
