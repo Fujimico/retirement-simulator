@@ -581,21 +581,25 @@ const MOBILE_STYLE = `
 }
 `;
 const PRINT_STYLE = `
-.print-chart-wrap { height: 270px; }
-.print-chart-break { display: none; }
-
 @media print {
   body { background: #fff !important; color: #111 !important; }
   .no-print { display: none !important; }
   .print-only { display: block !important; }
   .print-only-wrap { display: block !important; }
   .print-page { background: #fff !important; color: #111 !important; padding: 12px !important; }
-  .print-section { background: #f8f8f8 !important; border: 1px solid #ccc !important; border-radius: 6px !important; padding: 12px !important; margin-bottom: 10px !important; break-inside: avoid; page-break-inside: avoid; overflow: visible !important; }
-  .print-chart-wrap { height: 205px !important; overflow: visible !important; }
-  .print-chart-break { display: block; break-after: page; page-break-after: always; }
-  .print-main-chart { break-inside: avoid; page-break-inside: avoid; }
-  .print-main-table { break-inside: avoid; page-break-inside: avoid; }
-  .recharts-wrapper, .recharts-surface { overflow: visible !important; }
+  .print-section {
+    background: #f8f8f8 !important;
+    border: 1px solid #ccc !important;
+    border-radius: 6px !important;
+    padding: 12px !important;
+    margin-bottom: 10px !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .print-main-table { margin-top: 12px !important; }
+  .print-table { font-size: 12px !important; line-height: 1.35 !important; }
+  .print-table th { font-size: 13px !important; font-weight: 700 !important; }
+  .print-table td, .print-table th { padding-top: 4px !important; padding-bottom: 4px !important; }
   .print-title { color: #111 !important; }
   .print-value { color: #222 !important; font-weight: 700; }
   .print-label { color: #555 !important; }
@@ -955,10 +959,7 @@ export default function App() {
   }, []);
 
   const handlePrint = useCallback(() => {
-    if (typeof window === "undefined") return;
-    window.setTimeout(() => {
-      window.print();
-    }, 500);
+    window.print();
   }, []);
 
   const runSolver = useCallback(() => {
@@ -1480,7 +1481,7 @@ export default function App() {
       )}
 
       {/* グラフ */}
-      <div className="print-main-chart" style={{ ...P, marginBottom: 12 }}>
+      <div className="no-print" style={{ ...P, marginBottom: 12 }}>
         <div style={{ fontSize: 14, letterSpacing: "0.13em", textTransform: "uppercase", color: "#4a9eff", marginBottom: 8, fontWeight: 700 }}>資産推移グラフ</div>
         {/* 凡例 */}
         <div style={{ display: "flex", gap: 16, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
@@ -1502,9 +1503,8 @@ export default function App() {
             </div>
           ))}
         </div>
-        <div className="print-chart-wrap">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={chartData} margin={{ top: 8, right: 8, left: 6, bottom: 28 }}>
+        <ResponsiveContainer width="100%" height={270}>
+          <AreaChart data={chartData} margin={{ top: 8, right: 8, left: 6, bottom: 0 }}>
             <defs>
               <linearGradient id="gInv" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#4a9eff" stopOpacity={0.35} />
@@ -1549,21 +1549,19 @@ export default function App() {
                 label={{ value: `${withSale.depletionAge}歳`, fill: "#ff5577", fontSize: 14 }} />
             )}
             {/* 売却なし合計（背景点線） */}
-            <Area type="monotone" dataKey="assetsNoSale" stroke="#556677" strokeWidth={1.5} fill="url(#gNoSale)" dot={false} strokeDasharray="4 3" isAnimationActive={false} />
+            <Area type="monotone" dataKey="assetsNoSale" stroke="#556677" strokeWidth={1.5} fill="url(#gNoSale)" dot={false} strokeDasharray="4 3" />
             {/* 手元バケツ（積み上げ下段） */}
-            <Area type="monotone" dataKey="cashClamped" stroke="#4adfb0" strokeWidth={1.5} fill="url(#gCash)" dot={false} stackId="bucket" isAnimationActive={false} />
+            <Area type="monotone" dataKey="cashClamped" stroke="#4adfb0" strokeWidth={1.5} fill="url(#gCash)" dot={false} stackId="bucket" />
             {/* 運用バケツ（積み上げ上段） */}
-            <Area type="monotone" dataKey="investedClamped" stroke="#4a9eff" strokeWidth={2} fill="url(#gInv)" dot={false} stackId="bucket" isAnimationActive={false} />
+            <Area type="monotone" dataKey="investedClamped" stroke="#4a9eff" strokeWidth={2} fill="url(#gInv)" dot={false} stackId="bucket" />
             {/* 3シナリオ表示 */}
-            {triMode && <Line type="monotone" dataKey="assetsPessimistic" stroke="#ff8855" strokeWidth={1.5} dot={false} strokeDasharray="5 3" connectNulls isAnimationActive={false} />}
-            {triMode && <Line type="monotone" dataKey="assetsOptimistic"  stroke="#55cc88" strokeWidth={1.5} dot={false} strokeDasharray="5 3" connectNulls isAnimationActive={false} />}
+            {triMode && <Line type="monotone" dataKey="assetsPessimistic" stroke="#ff8855" strokeWidth={1.5} dot={false} strokeDasharray="5 3" connectNulls />}
+            {triMode && <Line type="monotone" dataKey="assetsOptimistic"  stroke="#55cc88" strokeWidth={1.5} dot={false} strokeDasharray="5 3" connectNulls />}
             {/* ストレスライン */}
-            {stressMode && stressResult && <Line type="monotone" dataKey="assetsStress" stroke="#ffcc44" strokeWidth={1.5} dot={false} strokeDasharray="4 2" connectNulls isAnimationActive={false} />}
+            {stressMode && stressResult && <Line type="monotone" dataKey="assetsStress" stroke="#ffcc44" strokeWidth={1.5} dot={false} strokeDasharray="4 2" connectNulls />}
           </AreaChart>
         </ResponsiveContainer>
-        </div>
       </div>
-      <div className="print-chart-break" />
 
       {/* コントロール */}
       <div className="no-print" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(270px, 100%), 1fr))", gap: 11 }}>
@@ -1891,7 +1889,7 @@ export default function App() {
       <div className="print-main-table" style={{ ...P, marginTop: 11 }}>
         <div style={{ fontSize: 14, letterSpacing: "0.13em", textTransform: "uppercase", color: "#4a9eff", marginBottom: 11, fontWeight: 700 }}>マイルストーン別 残高</div>
         <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 15, minWidth: 640 }}>
+          <table className="print-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: 15, minWidth: 640 }}>
             <thead>
               <tr>
                 <th style={{ color: "#445566", fontSize: 14, textAlign: "left", paddingBottom: 6, borderBottom: "1px solid #1e3a5f", paddingRight: 10 }}>項目</th>
