@@ -587,7 +587,11 @@ const PRINT_STYLE = `
   .print-only { display: block !important; }
   .print-only-wrap { display: block !important; }
   .print-page { background: #fff !important; color: #111 !important; padding: 12px !important; }
-  .print-section { background: #f8f8f8 !important; border: 1px solid #ccc !important; border-radius: 6px !important; padding: 12px !important; margin-bottom: 10px !important; break-inside: avoid; }
+  .print-section { background: #f8f8f8 !important; border: 1px solid #ccc !important; border-radius: 6px !important; padding: 12px !important; margin-bottom: 10px !important; break-inside: avoid; page-break-inside: avoid; overflow: visible !important; }
+  .print-chart-wrap { width: 100% !important; height: 240px !important; overflow: visible !important; }
+  .print-table { font-size: 12px !important; line-height: 1.35 !important; }
+  .print-table th { font-size: 13px !important; font-weight: 700 !important; }
+  .print-table td, .print-table th { padding-top: 4px !important; padding-bottom: 4px !important; }
   .print-title { color: #111 !important; }
   .print-value { color: #222 !important; font-weight: 700; }
   .print-label { color: #555 !important; }
@@ -1156,7 +1160,7 @@ export default function App() {
 
           <div className="print-section">
             <div className="print-label" style={{ fontSize: 14, marginBottom: 8, fontWeight: 700 }}>■ 基本設定</div>
-            <table style={{ width: "100%", fontSize: 15, borderCollapse: "collapse" }}>
+            <table className="print-table" style={{ width: "100%", fontSize: 15, borderCollapse: "collapse" }}>
               <tbody>
                 {[
                   ["現在の年齢", `${currentAge}歳`],
@@ -1190,7 +1194,7 @@ export default function App() {
 
           <div className="print-section">
             <div className="print-label" style={{ fontSize: 14, marginBottom: 8, fontWeight: 700 }}>■ 年齢別残高</div>
-            <table style={{ width: "100%", fontSize: 15, borderCollapse: "collapse" }}>
+            <table className="print-table" style={{ width: "100%", fontSize: 15, borderCollapse: "collapse" }}>
               <thead>
                 <tr>
                   {[50,55,60,65,70,75,80,85,90,95].map(a => (
@@ -1212,7 +1216,7 @@ export default function App() {
           {savedScenarios.length > 0 && (
             <div className="print-section">
               <div className="print-label" style={{ fontSize: 14, marginBottom: 8, fontWeight: 700 }}>■ 保存シナリオ比較</div>
-              <table style={{ width: "100%", fontSize: 14, borderCollapse: "collapse" }}>
+              <table className="print-table" style={{ width: "100%", fontSize: 14, borderCollapse: "collapse" }}>
                 <thead>
                   <tr>
                     <th className="print-label" style={{ textAlign: "left", padding: "3px 8px 3px 0", borderBottom: "1px solid #ccc" }}>シナリオ</th>
@@ -1491,8 +1495,9 @@ export default function App() {
             </div>
           ))}
         </div>
-        <ResponsiveContainer width="100%" height={270}>
-          <AreaChart data={chartData} margin={{ top: 8, right: 8, left: 6, bottom: 0 }}>
+        <div className="print-chart-wrap chart-height" style={{ width: "100%", height: 270, overflow: "visible" }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={chartData} margin={{ top: 8, right: 8, left: 6, bottom: 0 }}>
             <defs>
               <linearGradient id="gInv" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#4a9eff" stopOpacity={0.35} />
@@ -1537,18 +1542,19 @@ export default function App() {
                 label={{ value: `${withSale.depletionAge}歳`, fill: "#ff5577", fontSize: 14 }} />
             )}
             {/* 売却なし合計（背景点線） */}
-            <Area type="monotone" dataKey="assetsNoSale" stroke="#556677" strokeWidth={1.5} fill="url(#gNoSale)" dot={false} strokeDasharray="4 3" />
+            <Area isAnimationActive={false} type="monotone" dataKey="assetsNoSale" stroke="#556677" strokeWidth={1.5} fill="url(#gNoSale)" dot={false} strokeDasharray="4 3" />
             {/* 手元バケツ（積み上げ下段） */}
-            <Area type="monotone" dataKey="cashClamped" stroke="#4adfb0" strokeWidth={1.5} fill="url(#gCash)" dot={false} stackId="bucket" />
+            <Area isAnimationActive={false} type="monotone" dataKey="cashClamped" stroke="#4adfb0" strokeWidth={1.5} fill="url(#gCash)" dot={false} stackId="bucket" />
             {/* 運用バケツ（積み上げ上段） */}
-            <Area type="monotone" dataKey="investedClamped" stroke="#4a9eff" strokeWidth={2} fill="url(#gInv)" dot={false} stackId="bucket" />
+            <Area isAnimationActive={false} type="monotone" dataKey="investedClamped" stroke="#4a9eff" strokeWidth={2} fill="url(#gInv)" dot={false} stackId="bucket" />
             {/* 3シナリオ表示 */}
-            {triMode && <Line type="monotone" dataKey="assetsPessimistic" stroke="#ff8855" strokeWidth={1.5} dot={false} strokeDasharray="5 3" connectNulls />}
-            {triMode && <Line type="monotone" dataKey="assetsOptimistic"  stroke="#55cc88" strokeWidth={1.5} dot={false} strokeDasharray="5 3" connectNulls />}
+            {triMode && <Line isAnimationActive={false} type="monotone" dataKey="assetsPessimistic" stroke="#ff8855" strokeWidth={1.5} dot={false} strokeDasharray="5 3" connectNulls />}
+            {triMode && <Line isAnimationActive={false} type="monotone" dataKey="assetsOptimistic"  stroke="#55cc88" strokeWidth={1.5} dot={false} strokeDasharray="5 3" connectNulls />}
             {/* ストレスライン */}
-            {stressMode && stressResult && <Line type="monotone" dataKey="assetsStress" stroke="#ffcc44" strokeWidth={1.5} dot={false} strokeDasharray="4 2" connectNulls />}
-          </AreaChart>
-        </ResponsiveContainer>
+            {stressMode && stressResult && <Line isAnimationActive={false} type="monotone" dataKey="assetsStress" stroke="#ffcc44" strokeWidth={1.5} dot={false} strokeDasharray="4 2" connectNulls />}
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
       {/* コントロール */}
