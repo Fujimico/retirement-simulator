@@ -91,7 +91,7 @@ function simulate({
     annualExpense += annualLoan;
     let oneTimeExp = 0;
     for (const ev of oneTimeEvents) {
-      if (ev.enabled && age === ev.age) oneTimeExp += ev.amount * 1e4;
+      if (ev.enabled && age === ev.age) oneTimeExp += ev.amount * 1e4 * inflFactor;
     }
     annualExpense += oneTimeExp;
 
@@ -107,7 +107,8 @@ function simulate({
       annualIncome += privatePensionAmount * 12 * 1e4 * PRIVATE_PENSION_TAKE_RATE;
     if (age >= pensionAge) {
       const slideYears = age - pensionAge;
-      const slideFactor = Math.pow(1 + pensionSlideRate / 100, slideYears);
+      const pensionGrowthRate = (inflationRate + pensionSlideRate) / 100;
+      const slideFactor = Math.pow(1 + pensionGrowthRate, slideYears);
       annualIncome += pensionAmount * 12 * 1e4 * slideFactor * PENSION_TAKE_RATE;
     }
     const saleEvent = saleEnabled && age === saleSaleAge ? saleProceeds : 0;
@@ -245,7 +246,7 @@ const TERM_TIPS = {
   DWZ: "「使い切る目標残高」の設定。老後に残したい最低ラインを決め、\nそれを下回らない範囲で使える額を計算します。",
   bucket2: "資産を「運用バケツ（株・投信など）」と「手元バケツ（現金）」の\n2つに分けて管理する方式。取り崩しリスクを減らせます。",
   takeRate: "税・社会保険料を引いた後の手取り割合。\n例：月収100万円で手取り率80%なら、手元に入るのは80万円。",
-  macroSlide: "年金額の改定ルール。物価や賃金の上昇より少し低く抑えられる仕組み。\nここでは年間の調整率（マイナスも設定可）として反映します。",
+  macroSlide: "公的年金が物価上昇に対して毎年どれだけ実質的に目減りするかの想定。\nここでは『対インフレでの実質目減り率』として扱います。例：インフレ2.0%、ここが-0.5%なら、年金の名目額は年1.5%で増える想定です。",
   stress: "想定外の出来事（資産急落・インフレ・売却遅延など）が起きたときに\n資産がどう変わるかを確認する機能です。",
 };
 const Tip = ({ term, children }) => {
@@ -538,23 +539,47 @@ export default function App() {
   const investRatioPct = totalAssets > 0 ? Math.round(safeInvested / totalAssets * 100) : 0;
 
   const simParams = useMemo(() => ({
-    currentAge, totalAssets, investedAssets: safeInvested,
-    incomePhases, loans, oneTimeEvents,
-    expensePhases, inflationRate, returnRate,
-    pensionAge, pensionAmount,
-    privatePensionAge, privatePensionAmount, privatePensionYears,
-    oneTimeIncomes, cashBufferMonths,
-    defaultTakeRate, pensionSlideRate,
-    incomeInvestRatioPct, windfallInvestRatioPct,
+    currentAge,
+    totalAssets,
+    investedAssets: safeInvested,
+    incomePhases,
+    loans,
+    oneTimeEvents,
+    expensePhases,
+    inflationRate,
+    returnRate,
+    pensionAge,
+    pensionAmount,
+    privatePensionAge,
+    privatePensionAmount,
+    privatePensionYears,
+    oneTimeIncomes,
+    cashBufferMonths,
+    defaultTakeRate,
+    pensionSlideRate,
+    incomeInvestRatioPct,
+    windfallInvestRatioPct,
   }), [
-    currentAge, totalAssets, safeInvested,
-    incomePhases, loans, oneTimeEvents,
-    expensePhases, inflationRate, returnRate,
-    pensionAge, pensionAmount,
-    privatePensionAge, privatePensionAmount, privatePensionYears,
-    oneTimeIncomes, cashBufferMonths,
-    defaultTakeRate, pensionSlideRate,
-    incomeInvestRatioPct, windfallInvestRatioPct,
+    currentAge,
+    totalAssets,
+    safeInvested,
+    incomePhases,
+    loans,
+    oneTimeEvents,
+    expensePhases,
+    inflationRate,
+    returnRate,
+    pensionAge,
+    pensionAmount,
+    privatePensionAge,
+    privatePensionAmount,
+    privatePensionYears,
+    oneTimeIncomes,
+    cashBufferMonths,
+    defaultTakeRate,
+    pensionSlideRate,
+    incomeInvestRatioPct,
+    windfallInvestRatioPct,
   ]);
 
   const simParamsKey = useMemo(() => JSON.stringify(simParams), [simParams]);
@@ -738,9 +763,7 @@ export default function App() {
       try {
         const result = await storage.get('scenarios');
         if (result?.value) setSavedScenarios(JSON.parse(result.value));
-      } catch {
-        // 初回は空
-      }
+      } catch { /* 初回は空 */ }
     })();
   }, []);
 
@@ -753,9 +776,7 @@ export default function App() {
     };
     const updated = [...savedScenarios, newScenario];
     setSavedScenarios(updated);
-    try {
-      await storage.set('scenarios', JSON.stringify(updated));
-    } catch {}
+    try { await storage.set('scenarios', JSON.stringify(updated)); } catch(e) {}
     setShowSaveModal(false);
     setSaveNameInput("");
   };
@@ -763,9 +784,7 @@ export default function App() {
   const deleteScenario = async (id) => {
     const updated = savedScenarios.filter(s => s.id !== id);
     setSavedScenarios(updated);
-    try {
-      await storage.set('scenarios', JSON.stringify(updated));
-    } catch {}
+    try { await storage.set('scenarios', JSON.stringify(updated)); } catch(e) {}
   };
 
   const SCENARIO_COLORS = ["#4a9eff","#2adf90","#f0a040","#aa88ff","#ff8866","#ffcc44"];
@@ -1102,7 +1121,7 @@ export default function App() {
                 { label: "うち運用資産",  value: fmtFull(safeInvested * 1e4), sub: `（全体の${totalAssets > 0 ? Math.round(safeInvested / totalAssets * 100) : 0}%）` },
                 { label: "うち現金資産",  value: fmtFull(cashAssets * 1e4) },
                 { label: "月間生活費",    value: `${firstPhase?.monthly ?? "—"}万円/月`, sub: firstPhase ? `（${firstPhase.label}）` : "" },
-                { label: "公的年金",      value: `${pensionAge}歳〜 ${(pensionAmount * PENSION_TAKE_RATE).toFixed(1)}万/月`, sub: "（手取り）" },
+                { label: "公的年金",      value: `${pensionAge}歳〜 ${(pensionAmount * PENSION_TAKE_RATE).toFixed(1)}万/月`, sub: `（手取り・対インフレ年${pensionSlideRate}%）` },
                 ...(privatePensionAmount > 0 ? [{ label: "私的年金", value: `${privatePensionAge}歳〜 ${(privatePensionAmount * PRIVATE_PENSION_TAKE_RATE).toFixed(1)}万/月`, sub: `（手取り・${privatePensionYears}年間）` }] : []),
                 ...(saleEnabled ? [{ label: "会社売却", value: `${saleSaleAge}歳 手取り${fmtFull(calcAfterTax(saleGross*1e4,saleBookValue*1e4,saleTaxType))}`, sub: "(税引後)", color: "#f0c060" }] : []),
                 { label: "運用利回り",    value: `年 ${returnRate}%` },
@@ -1177,6 +1196,7 @@ export default function App() {
           各前提を少し変えたとき、90歳時点の残高がどれだけ変わるかの目安です
         </div>
         {sensitivityData.map((item) => {
+          const base90 = withSale.data.find(d => d.age === 90)?.assets ?? 0;
           const maxAbsDiff = Math.max(...sensitivityData.map(d => Math.abs(d.diff)), 1);
           const barPct = Math.abs(item.diff) / maxAbsDiff * 100;
           const isNeg = item.diff < 0;
@@ -1404,7 +1424,7 @@ export default function App() {
               <span /><span style={{ ...S, fontSize: 14 }}>期間名</span><span style={{ ...S, fontSize: 14 }}>開始</span><span />
               <span style={{ ...S, fontSize: 14 }}>終了</span><span style={{ ...S, fontSize: 14 }}>万/月</span><span />
             </div>
-            {expensePhases.map((ph) => (
+            {expensePhases.map((ph, idx) => (
               <div key={ph.id} style={{ display: "grid", gridTemplateColumns: "14px 1fr 46px 8px 46px 52px 20px", gap: 4, alignItems: "center", marginBottom: 6, minWidth: 300 }}>
                 <div style={{ width: 8, height: 8, borderRadius: "50%", background: ph.enabled ? "#ff8899" : "#334455", margin: "0 auto", cursor: "pointer" }}
                   onClick={() => setExpensePhases(ps => ps.map(p => p.id === ph.id ? { ...p, enabled: !p.enabled } : p))} />
@@ -1592,9 +1612,9 @@ export default function App() {
                 手取り → <span style={{ fontWeight: 700, color: "#4adfb0" }}>{(pensionAmount * PENSION_TAKE_RATE).toFixed(1)}万/月</span>
                 <span style={{ color: "#334455", marginLeft: 6 }}>（控除等 {(pensionAmount * (1 - PENSION_TAKE_RATE)).toFixed(1)}万/月）</span>
               </div>
-              <SliderInput label={<Tip term="macroSlide">マクロ経済スライド（年率）</Tip>} value={pensionSlideRate} min={-1.0} max={0} step={0.1} unit="%" onChange={setPensionSlideRate} accent="#4adfb0" />
+              <SliderInput label={<Tip term="macroSlide">年金の実質目減り率（対インフレ、年率）</Tip>} value={pensionSlideRate} min={-1.0} max={0} step={0.1} unit="%" onChange={setPensionSlideRate} accent="#4adfb0" />
               <div style={{ background: "#001510", border: "1px solid #2adf9018", borderRadius: 7, padding: "6px 9px" }}>
-                <InfoRow label={`受給開始から20年後（${pensionAge+20}歳）`} value={`${(pensionAmount * PENSION_TAKE_RATE * Math.pow(1 + pensionSlideRate/100, 20)).toFixed(1)}万/月`} color="#4adfb0" />
+                <InfoRow label={`受給開始から20年後（${pensionAge+20}歳）`} value={`${(pensionAmount * PENSION_TAKE_RATE * Math.pow(1 + (inflationRate + pensionSlideRate)/100, 20)).toFixed(1)}万/月`} color="#4adfb0" />
               </div>
             </Sec>
             <Sec title="個人年金">
