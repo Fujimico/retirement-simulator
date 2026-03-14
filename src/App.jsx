@@ -587,33 +587,7 @@ const PRINT_STYLE = `
   .print-only { display: block !important; }
   .print-only-wrap { display: block !important; }
   .print-page { background: #fff !important; color: #111 !important; padding: 12px !important; }
-  .print-section {
-    background: #f8f8f8 !important;
-    border: 1px solid #ccc !important;
-    border-radius: 6px !important;
-    padding: 12px !important;
-    margin-bottom: 10px !important;
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
-    overflow: visible !important;
-  }
-  .print-chart-wrap {
-    width: 100% !important;
-    height: 210px !important;
-    min-height: 210px !important;
-    overflow: visible !important;
-    position: relative !important;
-  }
-  .print-chart-wrap .recharts-responsive-container {
-    width: 100% !important;
-    height: 100% !important;
-    min-height: 210px !important;
-    overflow: visible !important;
-  }
-  .print-chart-wrap .recharts-wrapper,
-  .print-chart-wrap .recharts-surface {
-    overflow: visible !important;
-  }
+  .print-section { background: #f8f8f8 !important; border: 1px solid #ccc !important; border-radius: 6px !important; padding: 12px !important; margin-bottom: 10px !important; break-inside: avoid; }
   .print-title { color: #111 !important; }
   .print-value { color: #222 !important; font-weight: 700; }
   .print-label { color: #555 !important; }
@@ -817,6 +791,39 @@ export default function App() {
     assetsStress: stressResult?.data[i]?.assets ?? undefined,
   })), [withSale, noSale, triPessimistic, triOptimistic, stressResult, dwzEnabled, dwzTargetAge, dwzTargetAmount]);
 
+  const chartDomain = useMemo(() => {
+    const values = [];
+    for (const row of chartData) {
+      const candidates = [
+        row.assets,
+        row.cashClamped,
+        row.investedClamped,
+        row.assetsNoSale,
+        triMode ? row.assetsPessimistic : undefined,
+        triMode ? row.assetsOptimistic : undefined,
+        stressMode ? row.assetsStress : undefined,
+        dwzEnabled ? row.dwzTarget : undefined,
+      ];
+      for (const v of candidates) {
+        if (Number.isFinite(v) && Math.abs(v) < 1e10) values.push(v);
+      }
+    }
+
+    if (!values.length) return [-1e8, 1e8];
+
+    let minV = Math.min(...values, 0);
+    let maxV = Math.max(...values, 0);
+
+    if (minV === maxV) {
+      const pad = Math.max(Math.abs(minV) * 0.1, 1e7);
+      return [minV - pad, maxV + pad];
+    }
+
+    const range = maxV - minV;
+    const pad = Math.max(range * 0.08, 1e7);
+    return [minV - pad, maxV + pad];
+  }, [chartData, triMode, stressMode, dwzEnabled]);
+
 
   // ── 感度分析（追加1）: 各前提を変えたときの90歳残高差
   const SENSITIVITY_ITEMS = [
@@ -973,10 +980,7 @@ export default function App() {
   }, []);
 
   const handlePrint = useCallback(() => {
-    if (typeof window === 'undefined') return;
-    window.setTimeout(() => {
-      window.print();
-    }, 500);
+    window.print();
   }, []);
 
   const runSolver = useCallback(() => {
@@ -1520,9 +1524,8 @@ export default function App() {
             </div>
           ))}
         </div>
-        <div className="print-chart-wrap" style={{ height: 270 }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={chartData} margin={{ top: 8, right: 8, left: 6, bottom: 10 }}>
+        <ResponsiveContainer width="100%" height={270}>
+          <AreaChart data={chartData} margin={{ top: 8, right: 8, left: 6, bottom: 0 }}>
             <defs>
               <linearGradient id="gInv" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#4a9eff" stopOpacity={0.35} />
@@ -1539,7 +1542,7 @@ export default function App() {
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#0f2030" />
             <XAxis dataKey="age" tick={{ fill: "#445566", fontSize: 14 }} tickFormatter={v => `${v}歳`} interval={4} />
-            <YAxis tick={{ fill: "#445566", fontSize: 14 }} tickFormatter={fmt} width={54} />
+            <YAxis tick={{ fill: "#445566", fontSize: 14 }} tickFormatter={fmt} width={54} domain={chartDomain} allowDataOverflow={false} />
             <Tooltip content={<CustomTooltip />} />
             <ReferenceLine y={0} stroke="#334455" />
             {incomePhases.filter(p => p.enabled).map((p, i) => (
@@ -1567,19 +1570,18 @@ export default function App() {
                 label={{ value: `${withSale.depletionAge}歳`, fill: "#ff5577", fontSize: 14 }} />
             )}
             {/* 売却なし合計（背景点線） */}
-            <Area type="monotone" dataKey="assetsNoSale" stroke="#556677" strokeWidth={1.5} fill="url(#gNoSale)" dot={false} strokeDasharray="4 3" isAnimationActive={false} />
+            <Area type="monotone" dataKey="assetsNoSale" stroke="#556677" strokeWidth={1.5} fill="url(#gNoSale)" dot={false} strokeDasharray="4 3" />
             {/* 手元バケツ（積み上げ下段） */}
-            <Area type="monotone" dataKey="cashClamped" stroke="#4adfb0" strokeWidth={1.5} fill="url(#gCash)" dot={false} stackId="bucket" isAnimationActive={false} />
+            <Area type="monotone" dataKey="cashClamped" stroke="#4adfb0" strokeWidth={1.5} fill="url(#gCash)" dot={false} stackId="bucket" />
             {/* 運用バケツ（積み上げ上段） */}
-            <Area type="monotone" dataKey="investedClamped" stroke="#4a9eff" strokeWidth={2} fill="url(#gInv)" dot={false} stackId="bucket" isAnimationActive={false} />
+            <Area type="monotone" dataKey="investedClamped" stroke="#4a9eff" strokeWidth={2} fill="url(#gInv)" dot={false} stackId="bucket" />
             {/* 3シナリオ表示 */}
-            {triMode && <Line type="monotone" dataKey="assetsPessimistic" stroke="#ff8855" strokeWidth={1.5} dot={false} strokeDasharray="5 3" connectNulls isAnimationActive={false} />}
-            {triMode && <Line type="monotone" dataKey="assetsOptimistic"  stroke="#55cc88" strokeWidth={1.5} dot={false} strokeDasharray="5 3" connectNulls isAnimationActive={false} />}
+            {triMode && <Line type="monotone" dataKey="assetsPessimistic" stroke="#ff8855" strokeWidth={1.5} dot={false} strokeDasharray="5 3" connectNulls />}
+            {triMode && <Line type="monotone" dataKey="assetsOptimistic"  stroke="#55cc88" strokeWidth={1.5} dot={false} strokeDasharray="5 3" connectNulls />}
             {/* ストレスライン */}
-            {stressMode && stressResult && <Line type="monotone" dataKey="assetsStress" stroke="#ffcc44" strokeWidth={1.5} dot={false} strokeDasharray="4 2" connectNulls isAnimationActive={false} />}
+            {stressMode && stressResult && <Line type="monotone" dataKey="assetsStress" stroke="#ffcc44" strokeWidth={1.5} dot={false} strokeDasharray="4 2" connectNulls />}
           </AreaChart>
         </ResponsiveContainer>
-        </div>
       </div>
 
       {/* コントロール */}
