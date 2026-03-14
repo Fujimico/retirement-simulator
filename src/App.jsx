@@ -587,7 +587,16 @@ const PRINT_STYLE = `
   .print-only { display: block !important; }
   .print-only-wrap { display: block !important; }
   .print-page { background: #fff !important; color: #111 !important; padding: 12px !important; }
-  .print-section { background: #f8f8f8 !important; border: 1px solid #ccc !important; border-radius: 6px !important; padding: 12px !important; margin-bottom: 10px !important; break-inside: avoid; }
+  .print-section { background: #f8f8f8 !important; border: 1px solid #ccc !important; border-radius: 6px !important; padding: 12px !important; margin-bottom: 10px !important; break-inside: avoid; page-break-inside: avoid; overflow: visible !important; }
+  .print-chart-wrap { height: 270px; }
+  .print-chart-break { display: none; }
+  .print-main-chart { break-inside: avoid; page-break-inside: avoid; }
+  .print-main-table { break-inside: avoid; page-break-inside: avoid; }
+  .recharts-wrapper, .recharts-surface { overflow: visible !important; }
+  @media print {
+    .print-chart-wrap { height: 205px !important; overflow: visible !important; }
+    .print-chart-break { display: block; break-after: page; page-break-after: always; }
+  }
   .print-title { color: #111 !important; }
   .print-value { color: #222 !important; font-weight: 700; }
   .print-label { color: #555 !important; }
@@ -791,39 +800,6 @@ export default function App() {
     assetsStress: stressResult?.data[i]?.assets ?? undefined,
   })), [withSale, noSale, triPessimistic, triOptimistic, stressResult, dwzEnabled, dwzTargetAge, dwzTargetAmount]);
 
-  const chartDomain = useMemo(() => {
-    const values = [];
-    for (const row of chartData) {
-      const candidates = [
-        row.assets,
-        row.cashClamped,
-        row.investedClamped,
-        row.assetsNoSale,
-        triMode ? row.assetsPessimistic : undefined,
-        triMode ? row.assetsOptimistic : undefined,
-        stressMode ? row.assetsStress : undefined,
-        dwzEnabled ? row.dwzTarget : undefined,
-      ];
-      for (const v of candidates) {
-        if (Number.isFinite(v) && Math.abs(v) < 1e10) values.push(v);
-      }
-    }
-
-    if (!values.length) return [-1e8, 1e8];
-
-    let minV = Math.min(...values, 0);
-    let maxV = Math.max(...values, 0);
-
-    if (minV === maxV) {
-      const pad = Math.max(Math.abs(minV) * 0.1, 1e7);
-      return [minV - pad, maxV + pad];
-    }
-
-    const range = maxV - minV;
-    const pad = Math.max(range * 0.08, 1e7);
-    return [minV - pad, maxV + pad];
-  }, [chartData, triMode, stressMode, dwzEnabled]);
-
 
   // ── 感度分析（追加1）: 各前提を変えたときの90歳残高差
   const SENSITIVITY_ITEMS = [
@@ -980,7 +956,10 @@ export default function App() {
   }, []);
 
   const handlePrint = useCallback(() => {
-    window.print();
+    if (typeof window === "undefined") return;
+    window.setTimeout(() => {
+      window.print();
+    }, 500);
   }, []);
 
   const runSolver = useCallback(() => {
@@ -1502,7 +1481,7 @@ export default function App() {
       )}
 
       {/* グラフ */}
-      <div style={{ ...P, marginBottom: 12 }}>
+      <div className="print-main-chart" style={{ ...P, marginBottom: 12 }}>
         <div style={{ fontSize: 14, letterSpacing: "0.13em", textTransform: "uppercase", color: "#4a9eff", marginBottom: 8, fontWeight: 700 }}>資産推移グラフ</div>
         {/* 凡例 */}
         <div style={{ display: "flex", gap: 16, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
@@ -1524,8 +1503,9 @@ export default function App() {
             </div>
           ))}
         </div>
-        <ResponsiveContainer width="100%" height={270}>
-          <AreaChart data={chartData} margin={{ top: 8, right: 8, left: 6, bottom: 0 }}>
+        <div className="print-chart-wrap">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={chartData} margin={{ top: 8, right: 8, left: 6, bottom: 28 }}>
             <defs>
               <linearGradient id="gInv" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#4a9eff" stopOpacity={0.35} />
@@ -1542,7 +1522,7 @@ export default function App() {
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#0f2030" />
             <XAxis dataKey="age" tick={{ fill: "#445566", fontSize: 14 }} tickFormatter={v => `${v}歳`} interval={4} />
-            <YAxis tick={{ fill: "#445566", fontSize: 14 }} tickFormatter={fmt} width={54} domain={chartDomain} allowDataOverflow={false} />
+            <YAxis tick={{ fill: "#445566", fontSize: 14 }} tickFormatter={fmt} width={54} />
             <Tooltip content={<CustomTooltip />} />
             <ReferenceLine y={0} stroke="#334455" />
             {incomePhases.filter(p => p.enabled).map((p, i) => (
@@ -1570,19 +1550,21 @@ export default function App() {
                 label={{ value: `${withSale.depletionAge}歳`, fill: "#ff5577", fontSize: 14 }} />
             )}
             {/* 売却なし合計（背景点線） */}
-            <Area type="monotone" dataKey="assetsNoSale" stroke="#556677" strokeWidth={1.5} fill="url(#gNoSale)" dot={false} strokeDasharray="4 3" />
+            <Area type="monotone" dataKey="assetsNoSale" stroke="#556677" strokeWidth={1.5} fill="url(#gNoSale)" dot={false} strokeDasharray="4 3" isAnimationActive={false} />
             {/* 手元バケツ（積み上げ下段） */}
-            <Area type="monotone" dataKey="cashClamped" stroke="#4adfb0" strokeWidth={1.5} fill="url(#gCash)" dot={false} stackId="bucket" />
+            <Area type="monotone" dataKey="cashClamped" stroke="#4adfb0" strokeWidth={1.5} fill="url(#gCash)" dot={false} stackId="bucket" isAnimationActive={false} />
             {/* 運用バケツ（積み上げ上段） */}
-            <Area type="monotone" dataKey="investedClamped" stroke="#4a9eff" strokeWidth={2} fill="url(#gInv)" dot={false} stackId="bucket" />
+            <Area type="monotone" dataKey="investedClamped" stroke="#4a9eff" strokeWidth={2} fill="url(#gInv)" dot={false} stackId="bucket" isAnimationActive={false} />
             {/* 3シナリオ表示 */}
-            {triMode && <Line type="monotone" dataKey="assetsPessimistic" stroke="#ff8855" strokeWidth={1.5} dot={false} strokeDasharray="5 3" connectNulls />}
-            {triMode && <Line type="monotone" dataKey="assetsOptimistic"  stroke="#55cc88" strokeWidth={1.5} dot={false} strokeDasharray="5 3" connectNulls />}
+            {triMode && <Line type="monotone" dataKey="assetsPessimistic" stroke="#ff8855" strokeWidth={1.5} dot={false} strokeDasharray="5 3" connectNulls isAnimationActive={false} />}
+            {triMode && <Line type="monotone" dataKey="assetsOptimistic"  stroke="#55cc88" strokeWidth={1.5} dot={false} strokeDasharray="5 3" connectNulls isAnimationActive={false} />}
             {/* ストレスライン */}
-            {stressMode && stressResult && <Line type="monotone" dataKey="assetsStress" stroke="#ffcc44" strokeWidth={1.5} dot={false} strokeDasharray="4 2" connectNulls />}
+            {stressMode && stressResult && <Line type="monotone" dataKey="assetsStress" stroke="#ffcc44" strokeWidth={1.5} dot={false} strokeDasharray="4 2" connectNulls isAnimationActive={false} />}
           </AreaChart>
         </ResponsiveContainer>
+        </div>
       </div>
+      <div className="print-chart-break" />
 
       {/* コントロール */}
       <div className="no-print" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(270px, 100%), 1fr))", gap: 11 }}>
@@ -1907,7 +1889,7 @@ export default function App() {
           </div>
         )}
       {/* マイルストーンテーブル */}
-      <div style={{ ...P, marginTop: 11 }}>
+      <div className="print-main-table" style={{ ...P, marginTop: 11 }}>
         <div style={{ fontSize: 14, letterSpacing: "0.13em", textTransform: "uppercase", color: "#4a9eff", marginBottom: 11, fontWeight: 700 }}>マイルストーン別 残高</div>
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 15, minWidth: 640 }}>
